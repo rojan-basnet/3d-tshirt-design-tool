@@ -1,0 +1,2856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pique — polo design studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Anton&family=Archivo+Black&family=Bebas+Neue&family=Oswald:wght@500;700&family=Teko:wght@600&family=Bungee&family=Montserrat:wght@400;700;900&family=Righteous&family=Alfa+Slab+One&family=Abril+Fatface&family=Playfair+Display:wght@700;900&family=Cinzel:wght@700;900&family=Special+Elite&family=Press+Start+2P&family=Monoton&family=Bangers&family=Permanent+Marker&family=Lobster&family=Pacifico&family=Great+Vibes&display=swap">
+<style>
+:root{
+  --bg:#0F1426;
+  --panel:#161C33;
+  --panel-2:#1D2542;
+  --panel-3:#252E52;
+  --line:#2B3560;
+  --line-soft:#222A4C;
+  --chalk:#ECEBE3;
+  --chalk-2:#AEB6D4;
+  --chalk-3:#7C86AC;
+  --thread:#E8B457;
+  --thread-2:#F6D089;
+  --chalkblue:#8ABBEA;
+  --danger:#F2778B;
+  --sweep-a:#EDEBE3;
+  --sweep-b:#C6C4BC;
+  --r:9px;
+  --rail-l:296px;
+  --rail-r:352px;
+  --bar:56px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;background:var(--bg);color:var(--chalk);
+  font-family:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;
+  font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:0}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:#2C3560;border-radius:9px;border:2px solid var(--panel)}
+::-webkit-scrollbar-track{background:transparent}
+:focus-visible{outline:2px solid var(--thread);outline-offset:2px;border-radius:4px}
+
+/* ---------- stitch motif ---------- */
+.stitch{height:1px;background-image:repeating-linear-gradient(90deg,var(--thread) 0 7px,transparent 7px 14px);opacity:.34}
+
+/* ---------- top bar ---------- */
+.bar{
+  height:var(--bar);display:flex;align-items:center;gap:14px;padding:0 14px;
+  background:var(--panel);border-bottom:1px solid var(--line-soft);position:relative;z-index:5;
+}
+.bar::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:1px;
+  background-image:repeating-linear-gradient(90deg,var(--thread) 0 8px,transparent 8px 16px);opacity:.22}
+.mark{display:flex;align-items:baseline;gap:8px;flex:0 0 auto;padding-right:4px}
+.mark b{font-size:19px;font-weight:700;letter-spacing:-.02em}
+.mark span{color:var(--chalk-3);font-size:11.5px}
+.areatabs{display:flex;gap:3px;background:var(--panel-2);padding:3px;border-radius:var(--r);
+  overflow-x:auto;scrollbar-width:none;flex:0 1 auto}
+.areatabs::-webkit-scrollbar{display:none}
+.areatabs button{
+  padding:6px 13px;border-radius:6px;color:var(--chalk-2);white-space:nowrap;font-weight:500;
+  display:flex;align-items:center;gap:7px;transition:background .12s,color .12s;
+}
+.areatabs button:hover{color:var(--chalk)}
+.areatabs button[aria-selected="true"]{background:var(--thread);color:#1A1405;font-weight:600}
+.areatabs .pip{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.45}
+.areatabs button[data-used="1"] .pip{opacity:1;background:var(--chalkblue)}
+.areatabs button[aria-selected="true"][data-used="1"] .pip{background:#1A1405}
+.bar-right{margin-left:auto;display:flex;align-items:center;gap:7px}
+
+.btn{padding:7px 12px;border-radius:7px;background:var(--panel-2);color:var(--chalk);font-weight:500;
+  border:1px solid transparent;transition:background .12s,border-color .12s}
+.btn:hover{background:var(--panel-3)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn:disabled:hover{background:var(--panel-2)}
+.btn.primary{background:var(--thread);color:#1A1405;font-weight:600}
+.btn.primary:hover{background:var(--thread-2)}
+.btn.ghost{background:transparent;border-color:var(--line)}
+.btn.ghost:hover{background:var(--panel-2)}
+.btn.icon{padding:7px 9px;display:grid;place-items:center}
+.btn.danger:hover{background:#3A2036;color:var(--danger)}
+svg.ic{width:15px;height:15px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- layout ---------- */
+.shell{height:calc(100% - var(--bar));display:flex;min-height:0}
+.rail{background:var(--panel);display:flex;flex-direction:column;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.rail-l{width:var(--rail-l);flex:0 0 var(--rail-l);border-right:1px solid var(--line-soft)}
+.rail-r{width:var(--rail-r);flex:0 0 var(--rail-r);border-left:1px solid var(--line-soft)}
+.stage{flex:1;min-width:0;position:relative;background:linear-gradient(180deg,var(--sweep-a),var(--sweep-b))}
+#viewport{position:absolute;inset:0}
+#viewport canvas{display:block;touch-action:none}
+
+.viewbar{
+  position:absolute;left:50%;transform:translateX(-50%);bottom:16px;display:flex;gap:4px;
+  background:rgba(16,21,40,.82);backdrop-filter:blur(10px);padding:4px;border-radius:11px;
+  border:1px solid rgba(255,255,255,.09);box-shadow:0 8px 26px rgba(10,14,30,.28);max-width:calc(100% - 24px)
+}
+.viewbar button{padding:6px 11px;border-radius:7px;color:var(--chalk-2);font-weight:500;white-space:nowrap}
+.viewbar button:hover{background:rgba(255,255,255,.09);color:var(--chalk)}
+.viewbar button.on{background:var(--thread);color:#1A1405}
+.viewbar .sep{width:1px;background:rgba(255,255,255,.14);margin:4px 3px}
+.hint{position:absolute;left:14px;bottom:18px;color:#5E5B52;font-size:11.5px;pointer-events:none}
+.stagetag{position:absolute;left:14px;top:14px;display:flex;align-items:center;gap:8px;
+  color:#4E4B44;font-size:11.5px;pointer-events:none}
+.stagetag b{color:#2C2A25;font-weight:600}
+.spinner{position:absolute;inset:0;display:grid;place-items:center;color:#5E5B52;font-size:12.5px;
+  background:linear-gradient(180deg,var(--sweep-a),var(--sweep-b));z-index:3;transition:opacity .4s}
+.spinner.gone{opacity:0;pointer-events:none}
+
+/* ---------- panel sections ---------- */
+.sec{border-bottom:1px solid var(--line-soft)}
+.sec>h3{
+  margin:0;padding:12px 14px 10px;font-size:11.5px;font-weight:600;color:var(--chalk-3);
+  display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none
+}
+.sec>h3:hover{color:var(--chalk-2)}
+.sec>h3 .chev{margin-left:auto;transition:transform .16s}
+.sec[data-open="0"]>h3 .chev{transform:rotate(-90deg)}
+.sec[data-open="0"] .secbody{display:none}
+.secbody{padding:0 14px 14px}
+
+.row{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.row:last-child{margin-bottom:0}
+.lbl{font-size:11.5px;color:var(--chalk-3);flex:0 0 66px}
+.grow{flex:1;min-width:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+
+input[type=text],input[type=number],textarea,select{
+  width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:7px;
+  padding:7px 9px;color:var(--chalk);transition:border-color .12s
+}
+textarea{resize:vertical;min-height:62px;line-height:1.35}
+input[type=text]:focus,textarea:focus,select:focus{border-color:var(--thread);outline:none}
+select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' stroke='%23AEB6D4' stroke-width='1.5' fill='none' stroke-linecap='round'/></svg>");
+  background-repeat:no-repeat;background-position:right 9px center;padding-right:26px}
+input[type=range]{width:100%;accent-color:var(--thread);height:18px;background:transparent}
+input[type=color]{
+  width:34px;height:30px;padding:2px;border:1px solid var(--line);border-radius:7px;
+  background:var(--panel-2);cursor:pointer;flex:0 0 auto
+}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+input[type=color]::-webkit-color-swatch{border:none;border-radius:4px}
+input[type=file]{display:none}
+.chk{display:flex;align-items:center;gap:7px;color:var(--chalk-2);cursor:pointer;font-size:12px}
+.chk input{accent-color:var(--thread);width:14px;height:14px;margin:0}
+.num{flex:0 0 46px;text-align:right;color:var(--chalk-2);font-size:11.5px;font-variant-numeric:tabular-nums}
+
+.seg{display:flex;background:var(--panel-2);border:1px solid var(--line);border-radius:7px;padding:2px;gap:2px}
+.seg button{flex:1;padding:5px 6px;border-radius:5px;color:var(--chalk-3);font-size:11.5px;display:grid;place-items:center}
+.seg button:hover{color:var(--chalk)}
+.seg button.on{background:var(--panel-3);color:var(--chalk)}
+
+.swatches{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;margin-bottom:9px}
+.sw{aspect-ratio:1;border-radius:6px;border:1.5px solid rgba(255,255,255,.12);position:relative}
+.sw:hover{transform:scale(1.09)}
+.sw.on{border-color:var(--thread);box-shadow:0 0 0 2px rgba(232,180,87,.28)}
+
+.addgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.add{
+  background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r);padding:11px 6px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--chalk-2);font-size:11.5px;
+  transition:border-color .12s,color .12s,background .12s
+}
+.add:hover{border-color:var(--thread);color:var(--chalk);background:var(--panel-3)}
+.add svg{width:19px;height:19px}
+
+.artgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;max-height:190px;overflow-y:auto;
+  padding:2px;margin-top:9px}
+.artgrid button{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;aspect-ratio:1;
+  display:grid;place-items:center;padding:4px}
+.artgrid button:hover{border-color:var(--thread);background:var(--panel-3)}
+.artgrid canvas{width:100%;height:100%;display:block}
+
+.fontgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px;max-height:172px;overflow-y:auto;padding:2px}
+.fontgrid button{
+  background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:8px 6px;
+  font-size:15px;line-height:1.15;color:var(--chalk-2);overflow:hidden;white-space:nowrap;text-overflow:ellipsis
+}
+.fontgrid button:hover{border-color:var(--chalkblue);color:var(--chalk)}
+.fontgrid button.on{border-color:var(--thread);background:var(--panel-3);color:var(--chalk)}
+
+/* ---------- layers ---------- */
+.layers{display:flex;flex-direction:column;gap:5px}
+.layer{
+  display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;background:var(--panel-2);
+  border:1px solid transparent;cursor:pointer;transition:border-color .12s,background .12s
+}
+.layer:hover{background:var(--panel-3)}
+.layer.on{border-color:var(--thread);background:var(--panel-3)}
+.layer .th{width:26px;height:26px;border-radius:5px;flex:0 0 auto;
+  background:#10162B;display:grid;place-items:center;overflow:hidden}
+.layer .th canvas{width:100%;height:100%;object-fit:contain}
+.layer .nm{flex:1;min-width:0;overflow:hidden;font-size:12px;line-height:1.25}
+.layer .nm b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.layer .nm i{display:block;font-style:normal;font-size:9.5px;color:var(--chalk-3);
+  letter-spacing:.04em;text-transform:uppercase}
+.layer .mini{padding:3px;color:var(--chalk-3);border-radius:4px;display:grid;place-items:center}
+.layer .mini:hover{color:var(--chalk);background:rgba(255,255,255,.08)}
+.layer .mini svg{width:13px;height:13px}
+.layer.hid .nm,.layer.hid .th{opacity:.36}
+.empty{color:var(--chalk-3);font-size:12px;padding:10px 0 4px;line-height:1.5}
+.empty b{color:var(--chalk-2);font-weight:500;display:block;margin-bottom:3px}
+
+/* ---------- 2D editor ---------- */
+.editwrap{padding:14px 14px 10px}
+.editframe{
+  position:relative;border-radius:10px;overflow:hidden;background:#0B1022;
+  border:1px solid var(--line);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)
+}
+#editor{display:block;width:100%;touch-action:none;cursor:default}
+.edithead{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.edithead b{font-size:12.5px;font-weight:600}
+.edithead span{color:var(--chalk-3);font-size:11.5px;font-variant-numeric:tabular-nums}
+.edittip{color:var(--chalk-3);font-size:11px;margin-top:8px;text-align:center}
+
+#props{padding:0 14px 26px}
+.prophead{display:flex;align-items:center;gap:8px;padding:12px 0 10px;margin-bottom:4px}
+.prophead b{font-size:12.5px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pill{font-size:10.5px;padding:2px 7px;border-radius:20px;background:var(--panel-3);color:var(--chalk-2)}
+
+.toast{
+  position:fixed;left:50%;bottom:22px;transform:translate(-50%,14px);background:var(--panel-3);
+  border:1px solid var(--line);color:var(--chalk);padding:9px 15px;border-radius:9px;font-size:12.5px;
+  box-shadow:0 12px 34px rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:.22s;z-index:40
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+.mtabs{display:none}
+
+@media (max-width:1080px){
+  :root{--rail-l:260px;--rail-r:310px}
+  .mark span{display:none}
+}
+@media (max-width:900px){
+  body{overflow:auto}
+  .bar{flex-wrap:wrap;height:auto;padding:9px 11px;gap:9px}
+  .areatabs{order:3;width:100%}
+  .bar-right{margin-left:auto}
+  .shell{height:auto;display:block}
+  .stage{height:46vh;min-height:300px;position:relative}
+  .rail{width:100%;flex:none;border:0;border-top:1px solid var(--line-soft);overflow:visible}
+  .rail-l[data-tab="design"],.rail-r[data-tab="shirt"]{display:none}
+  .mtabs{
+    display:flex;position:sticky;top:0;z-index:6;background:var(--panel);gap:3px;padding:7px 11px;
+    border-bottom:1px solid var(--line-soft)
+  }
+  .mtabs button{flex:1;padding:8px;border-radius:7px;background:var(--panel-2);color:var(--chalk-2);font-weight:500}
+  .mtabs button.on{background:var(--thread);color:#1A1405;font-weight:600}
+  .hint{display:none}
+  .swatches{grid-template-columns:repeat(10,1fr)}
+}
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="mark"><b>Pique</b><span>polo design studio</span></div>
+  <nav class="areatabs" id="areaTabs" role="tablist"></nav>
+  <div class="bar-right">
+    <button class="btn icon" id="btnUndo" title="Undo (Ctrl+Z)" disabled>
+      <svg class="ic" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-4"/></svg>
+    </button>
+    <button class="btn icon" id="btnRedo" title="Redo (Ctrl+Shift+Z)" disabled>
+      <svg class="ic" viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h4"/></svg>
+    </button>
+    <button class="btn ghost" id="btnMenu">File</button>
+    <button class="btn primary" id="btnShot">Download mockup</button>
+  </div>
+</header>
+
+<div class="mtabs" id="mtabs">
+  <button data-tab="shirt">Shirt</button>
+  <button data-tab="design" class="on">Design</button>
+</div>
+
+<div class="shell">
+  <!-- LEFT RAIL -->
+  <aside class="rail rail-l" id="railL" data-tab="design">
+
+    <section class="sec" data-open="1" id="secGarment">
+      <h3>Garment colour
+        <svg class="ic chev" viewBox="0 0 24 24" style="width:13px;height:13px"><path d="M6 9l6 6 6-6"/></svg>
+      </h3>
+      <div class="secbody">
+        <div class="swatches" id="swatches"></div>
+        <div class="row">
+          <span class="lbl">Body</span>
+          <input type="color" id="cBody" value="#1E2A45">
+          <input type="text" id="cBodyHex" class="grow" spellcheck="false" maxlength="7">
+        </div>
+        <div class="row">
+          <span class="lbl">Sleeves</span>
+          <input type="color" id="cSleeve" value="#1E2A45">
+          <label class="chk grow"><input type="checkbox" id="mSleeve" checked>Match body</label>
+        </div>
+        <div class="row">
+          <span class="lbl">Collar &amp; cuffs</span>
+          <input type="color" id="cTrim" value="#1E2A45">
+          <label class="chk grow"><input type="checkbox" id="mTrim" checked>Match body</label>
+        </div>
+        <div class="row">
+          <span class="lbl">Placket</span>
+          <input type="color" id="cPlacket" value="#1E2A45">
+          <label class="chk grow"><input type="checkbox" id="mPlacket" checked>Match body</label>
+        </div>
+        <div class="row">
+          <span class="lbl">Buttons</span>
+          <input type="color" id="cButton" value="#E8E4D8">
+          <span class="grow" style="color:var(--chalk-3);font-size:11.5px">Three-button placket</span>
+        </div>
+        <div class="stitch" style="margin:13px 0 11px"></div>
+        <div class="row">
+          <span class="lbl">Knit</span>
+          <select id="fabric" class="grow">
+            <option value="pique">Pique — waffle knit</option>
+            <option value="jersey">Jersey — fine knit</option>
+            <option value="heather">Heather — marled</option>
+            <option value="smooth">Smooth — flat</option>
+          </select>
+        </div>
+        <div class="row">
+          <span class="lbl">Texture</span>
+          <input type="range" id="fabDepth" min="0" max="100" value="55" class="grow">
+          <span class="num" id="fabDepthV">55</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" data-open="1" id="secAdd">
+      <h3>Add to <span id="addWhere" style="color:var(--chalk)">front</span>
+        <svg class="ic chev" viewBox="0 0 24 24" style="width:13px;height:13px"><path d="M6 9l6 6 6-6"/></svg>
+      </h3>
+      <div class="secbody">
+        <div class="addgrid">
+          <button class="add" id="addText">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M5 6V4h14v2"/><path d="M12 4v16"/><path d="M9 20h6"/></svg>
+            Text
+          </button>
+          <button class="add" id="addImage">
+            <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M21 16l-5-5-6 6-3-3-4 4"/></svg>
+            Image
+          </button>
+          <button class="add" id="addArtBtn">
+            <svg class="ic" viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.8-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.4l6.1-.8z"/></svg>
+            Artwork
+          </button>
+        </div>
+        <div id="artPanel" style="display:none">
+          <div class="row" style="margin-top:11px">
+            <select id="artCat" class="grow"></select>
+          </div>
+          <div class="artgrid" id="artGrid"></div>
+        </div>
+        <input type="file" id="fileImg" accept="image/*" multiple>
+      </div>
+    </section>
+
+    <section class="sec" data-open="1" id="secLayers">
+      <h3>Layers
+        <span class="pill" id="layerCount">0</span>
+        <svg class="ic chev" viewBox="0 0 24 24" style="width:13px;height:13px;margin-left:0"><path d="M6 9l6 6 6-6"/></svg>
+      </h3>
+      <div class="secbody">
+        <div class="layers" id="layerList"></div>
+      </div>
+    </section>
+
+    <section class="sec" data-open="0" id="secView">
+      <h3>Studio
+        <svg class="ic chev" viewBox="0 0 24 24" style="width:13px;height:13px"><path d="M6 9l6 6 6-6"/></svg>
+      </h3>
+      <div class="secbody">
+        <div class="row">
+          <span class="lbl">Backdrop</span>
+          <select id="backdrop" class="grow">
+            <option value="studio">Studio sweep</option>
+            <option value="paper">Pattern paper</option>
+            <option value="slate">Slate</option>
+            <option value="denim">Denim</option>
+          </select>
+        </div>
+        <label class="chk" style="margin-bottom:9px"><input type="checkbox" id="showArea" checked>Outline the pattern pieces</label>
+        <label class="chk" style="margin-bottom:9px"><input type="checkbox" id="followArea" checked>Turn the shirt when I switch pieces</label>
+        <label class="chk"><input type="checkbox" id="showShadow" checked>Contact shadow</label>
+      </div>
+    </section>
+  </aside>
+
+  <!-- STAGE -->
+  <div class="stage" id="stage">
+    <div id="viewport"></div>
+    <div class="stagetag"><b id="tagArea">Front</b><span id="tagCount"></span></div>
+    <div class="viewbar">
+      <button data-view="front">Front</button>
+      <button data-view="back">Back</button>
+      <button data-view="left">Left</button>
+      <button data-view="right">Right</button>
+      <span class="sep"></span>
+      <button data-view="fit" title="Reset the camera">Fit</button>
+      <button id="btnSpin" title="Turntable">Spin</button>
+    </div>
+    <div class="hint">Drag to turn · scroll to zoom · right-drag to pan</div>
+    <div class="spinner" id="spinner">Stitching the model…</div>
+  </div>
+
+  <!-- RIGHT RAIL -->
+  <aside class="rail rail-r" id="railR" data-tab="design">
+    <div class="editwrap">
+      <div class="edithead">
+        <b id="edTitle">Front</b>
+        <span id="edSize">—</span>
+      </div>
+      <div class="editframe"><canvas id="editor"></canvas></div>
+      <div class="edittip" id="edTip">Drag to move · corners resize · scroll to zoom · shift-drag to pan</div>
+    </div>
+    <div class="stitch" style="margin:2px 14px 0"></div>
+    <div id="props"></div>
+  </aside>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+"use strict";
+/* ============================================================================
+   PIQUE — single-file 3D polo design studio
+   Sections: 1 constants  2 art library  3 state  4 rendering (2D)
+             5 three.js model  6 camera  7 editor interaction  8 UI  9 boot
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- 1. setup */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const lerp = (a, b, t) => a + (b - a) * t;
+const uid = () => Math.random().toString(36).slice(2, 9);
+const DEG = Math.PI / 180;
+
+/* ---------------------------------------------------------------------------
+   THE ATLAS
+   The whole garment shares one 2048px texture laid out like a cutting pattern.
+   Every entry below is a real pattern piece, so artwork can sit anywhere on it
+   — edge to edge, over the shoulder, around the side seam, onto the collar.
+   Sizes are measured off the geometry at boot, so the layout is to scale.
+--------------------------------------------------------------------------- */
+const ATLAS = 2048;
+let PANELS = {}, PKEYS = [], PPU = 400;   /* PPU = atlas pixels per world unit */
+
+const atlasCv = document.createElement('canvas');
+atlasCv.width = atlasCv.height = ATLAS;
+const atlasCx = atlasCv.getContext('2d');
+const baseCv = document.createElement('canvas');
+baseCv.width = baseCv.height = ATLAS;
+const baseCx = baseCv.getContext('2d');
+let atlasTex = null;
+
+const inches = px => px / PPU * 10;
+
+const GARMENT_SWATCHES = [
+  ['#F2F1EC','White'], ['#DCD8CC','Natural'], ['#C9C3B4','Stone'], ['#9AA0A6','Silver'],
+  ['#6E7276','Graphite'], ['#3A3D42','Charcoal'], ['#17181B','Black'], ['#1E2A45','Navy'],
+  ['#20488F','Royal'], ['#3E7CC4','Sky'], ['#0F4F46','Bottle'], ['#2E7D4F','Kelly'],
+  ['#7A2230','Maroon'], ['#B8323C','Red'], ['#D96B2B','Orange'], ['#E4B73A','Gold'],
+  ['#D98CA8','Blush'], ['#5B3E8E','Purple'], ['#8C6A4A','Khaki'], ['#4E5B3C','Olive']
+];
+
+const FONTS = [
+  { n:'Anton',            w:[400],        t:'Display' },
+  { n:'Archivo Black',    w:[400],        t:'Display' },
+  { n:'Alfa Slab One',    w:[400],        t:'Display' },
+  { n:'Bebas Neue',       w:[400],        t:'Condensed' },
+  { n:'Oswald',           w:[500,700],    t:'Condensed' },
+  { n:'Teko',             w:[600],        t:'Condensed' },
+  { n:'Bungee',           w:[400],        t:'Signage' },
+  { n:'Montserrat',       w:[400,700,900],t:'Sans' },
+  { n:'Archivo',          w:[400,600,700],t:'Sans' },
+  { n:'Righteous',        w:[400],        t:'Rounded' },
+  { n:'Abril Fatface',    w:[400],        t:'Serif' },
+  { n:'Playfair Display', w:[700,900],    t:'Serif' },
+  { n:'Cinzel',           w:[700,900],    t:'Roman' },
+  { n:'Special Elite',    w:[400],        t:'Typewriter' },
+  { n:'Press Start 2P',   w:[400],        t:'Pixel' },
+  { n:'Monoton',          w:[400],        t:'Retro' },
+  { n:'Bangers',          w:[400],        t:'Comic' },
+  { n:'Permanent Marker', w:[400],        t:'Marker' },
+  { n:'Lobster',          w:[400],        t:'Script' },
+  { n:'Pacifico',         w:[400],        t:'Script' },
+  { n:'Great Vibes',      w:[400],        t:'Script' }
+];
+const FONT_BY_NAME = {}; FONTS.forEach(f => FONT_BY_NAME[f.n] = f);
+
+/* ------------------------------------------------------- 2. art library */
+const P2 = () => new Path2D();
+function polyPath(pts, close){
+  const p = new Path2D();
+  pts.forEach((q,i) => i ? p.lineTo(q[0],q[1]) : p.moveTo(q[0],q[1]));
+  if (close !== false) p.closePath();
+  return p;
+}
+function starPts(n, inner, rot, cx, cy, R){
+  rot = rot === undefined ? -Math.PI/2 : rot; cx = cx||50; cy = cy||50; R = R||48;
+  const pts = [];
+  for (let i = 0; i < n*2; i++){
+    const r = (i % 2) ? R*inner : R, a = rot + i*Math.PI/n;
+    pts.push([cx + r*Math.cos(a), cy + r*Math.sin(a)]);
+  }
+  return pts;
+}
+function ngonPts(n, rot, cx, cy, R){
+  rot = rot === undefined ? -Math.PI/2 : rot; cx = cx||50; cy = cy||50; R = R||48;
+  const pts = [];
+  for (let i = 0; i < n; i++){ const a = rot + i*2*Math.PI/n; pts.push([cx + R*Math.cos(a), cy + R*Math.sin(a)]); }
+  return pts;
+}
+function circlePath(cx, cy, r){ const p = P2(); p.moveTo(cx+r, cy); p.arc(cx, cy, r, 0, Math.PI*2); return p; }
+function ringPath(cx, cy, r1, r2){
+  const p = P2();
+  p.moveTo(cx+r1, cy); p.arc(cx, cy, r1, 0, Math.PI*2);
+  p.moveTo(cx+r2, cy); p.arc(cx, cy, r2, 0, Math.PI*2);
+  return p;
+}
+function rectPath(x, y, w, h, r){
+  const p = P2();
+  if (!r) { p.rect(x,y,w,h); return p; }
+  r = Math.min(r, w/2, h/2);
+  p.moveTo(x+r,y); p.lineTo(x+w-r,y); p.quadraticCurveTo(x+w,y,x+w,y+r);
+  p.lineTo(x+w,y+h-r); p.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  p.lineTo(x+r,y+h); p.quadraticCurveTo(x,y+h,x,y+h-r);
+  p.lineTo(x,y+r); p.quadraticCurveTo(x,y,x+r,y); p.closePath();
+  return p;
+}
+
+/* each entry: [key, label, category, builder -> [{p, rule?, stroke?, lw?, sec?}] ] */
+const ART_DEFS = [
+  ['star','Star','Marks', () => [{p:polyPath(starPts(5,0.42))}]],
+  ['star6','Six-point','Marks', () => [{p:polyPath(starPts(6,0.55))}]],
+  ['sparkle','Sparkle','Marks', () => [{p:polyPath(starPts(4,0.2))}]],
+  ['compass','Compass','Marks', () => [{p:polyPath(starPts(8,0.3))},{p:circlePath(50,50,9),sec:true}]],
+  ['burst','Burst','Marks', () => [{p:polyPath(starPts(18,0.74))}]],
+  ['sun','Sun','Marks', () => {
+    const parts = [{p:circlePath(50,50,22)}];
+    const p = P2();
+    for (let i=0;i<12;i++){ const a=i*Math.PI/6; p.moveTo(50+28*Math.cos(a),50+28*Math.sin(a)); p.lineTo(50+46*Math.cos(a),50+46*Math.sin(a)); }
+    parts.push({p, stroke:true, lw:6});
+    return parts;
+  }],
+  ['circle','Disc','Shapes', () => [{p:circlePath(50,50,46)}]],
+  ['ring','Ring','Shapes', () => [{p:ringPath(50,50,46,33), rule:'evenodd'}]],
+  ['target','Target','Shapes', () => [
+    {p:ringPath(50,50,46,36), rule:'evenodd'}, {p:ringPath(50,50,28,18), rule:'evenodd'}, {p:circlePath(50,50,10)}
+  ]],
+  ['triangle','Triangle','Shapes', () => [{p:polyPath(ngonPts(3))}]],
+  ['square','Square','Shapes', () => [{p:rectPath(6,6,88,88,4)}]],
+  ['diamond','Diamond','Shapes', () => [{p:polyPath([[50,2],[94,50],[50,98],[6,50]])}]],
+  ['hexagon','Hexagon','Shapes', () => [{p:polyPath(ngonPts(6))}]],
+  ['frame','Frame','Shapes', () => [{p:(()=>{const p=rectPath(4,4,92,92,6); const q=rectPath(13,13,74,74,3); return mergePath(p,q);})(), rule:'evenodd'}]],
+  ['shield','Shield','Badges', () => [{p:(()=>{const p=P2();
+      p.moveTo(50,3); p.lineTo(93,18); p.lineTo(93,50);
+      p.bezierCurveTo(93,76,73,91,50,98); p.bezierCurveTo(27,91,7,76,7,50);
+      p.lineTo(7,18); p.closePath(); return p;})()}]],
+  ['banner','Banner','Badges', () => [{p:polyPath([[4,26],[96,26],[96,66],[80,58],[80,86],[62,72],[50,80],[38,72],[20,86],[20,58],[4,66]])}]],
+  ['arch','Arch','Badges', () => [{p:(()=>{const p=P2();
+      p.arc(50,62,46,Math.PI,0); p.lineTo(31,62); p.arc(50,62,19,0,Math.PI,true); p.closePath(); return p;})()}]],
+  ['tag','Tag','Badges', () => [{p:(()=>{const p=P2();
+      p.moveTo(10,10); p.lineTo(58,10); p.lineTo(92,50); p.lineTo(58,90); p.lineTo(10,90); p.closePath();
+      p.moveTo(31,50); p.arc(24,50,7,0,Math.PI*2); return p;})(), rule:'evenodd'}]],
+  ['bubble','Speech','Badges', () => [{p:(()=>{const p=rectPath(5,10,90,58,12);
+      const t=polyPath([[30,66],[56,66],[34,92]]); return mergePath(p,t);})()}]],
+  ['bolt','Bolt','Energy', () => [{p:polyPath([[59,3],[21,55],[45,55],[37,97],[79,41],[54,41]])}]],
+  ['flame','Flame','Energy', () => [{p:(()=>{const p=P2();
+      p.moveTo(50,3); p.bezierCurveTo(72,28,87,42,87,61); p.bezierCurveTo(87,83,70,97,50,97);
+      p.bezierCurveTo(30,97,13,83,13,61); p.bezierCurveTo(13,45,26,38,34,25);
+      p.bezierCurveTo(37,45,45,49,49,41); p.bezierCurveTo(53,33,48,17,50,3); p.closePath(); return p;})()}]],
+  ['drop','Drop','Energy', () => [{p:(()=>{const p=P2();
+      p.moveTo(50,3); p.bezierCurveTo(78,36,90,52,90,66); p.bezierCurveTo(90,84,72,97,50,97);
+      p.bezierCurveTo(28,97,10,84,10,66); p.bezierCurveTo(10,52,22,36,50,3); p.closePath(); return p;})()}]],
+  ['heart','Heart','Nature', () => [{p:(()=>{const p=P2();
+      p.moveTo(50,92); p.bezierCurveTo(9,63,5,36,22,23); p.bezierCurveTo(37,12,48,24,50,33);
+      p.bezierCurveTo(52,24,63,12,78,23); p.bezierCurveTo(95,36,91,63,50,92); p.closePath(); return p;})()}]],
+  ['leaf','Leaf','Nature', () => [{p:(()=>{const p=P2();
+      p.moveTo(50,3); p.bezierCurveTo(90,24,93,66,56,95); p.bezierCurveTo(52,97,48,97,44,95);
+      p.bezierCurveTo(7,66,10,24,50,3); p.closePath(); return p;})()},
+      {p:(()=>{const p=P2(); p.moveTo(50,14); p.lineTo(50,94); return p;})(), stroke:true, lw:3.5, sec:true}]],
+  ['mountain','Peaks','Nature', () => [{p:polyPath([[2,88],[33,26],[52,56],[67,34],[98,88]])}]],
+  ['wave','Waves','Nature', () => [{p:(()=>{const p=P2();
+      for (let r=0;r<3;r++){ const y=34+r*18; p.moveTo(6,y);
+        p.quadraticCurveTo(21,y-13,37,y); p.quadraticCurveTo(52,y+13,68,y); p.quadraticCurveTo(83,y-13,94,y); }
+      return p;})(), stroke:true, lw:7}]],
+  ['globe','Globe','Nature', () => [
+    {p:circlePath(50,50,45), stroke:true, lw:5},
+    {p:(()=>{const p=P2(); p.moveTo(5,50); p.lineTo(95,50);
+      p.moveTo(50,5); p.bezierCurveTo(24,26,24,74,50,95); p.moveTo(50,5); p.bezierCurveTo(76,26,76,74,50,95);
+      return p;})(), stroke:true, lw:4, sec:true}]],
+  ['paw','Paw','Nature', () => {
+    const p = P2();
+    p.moveTo(50,96); p.bezierCurveTo(26,96,15,82,15,70); p.bezierCurveTo(15,56,32,48,50,48);
+    p.bezierCurveTo(68,48,85,56,85,70); p.bezierCurveTo(85,82,74,96,50,96); p.closePath();
+    const t = P2();
+    [[22,32,12,15],[43,20,12,16],[65,23,12,15],[84,40,11,13]].forEach(e => {
+      t.moveTo(e[0]+e[2], e[1]); t.ellipse(e[0], e[1], e[2], e[3], 0, 0, Math.PI*2);
+    });
+    return [{p:mergePath(p,t)}];
+  }],
+  ['crown','Crown','Heraldry', () => [{p:polyPath([[6,86],[6,26],[28,46],[50,12],[72,46],[94,26],[94,86]])}]],
+  ['wings','Wings','Heraldry', () => [{p:(()=>{const p=P2();
+      p.moveTo(50,38); p.bezierCurveTo(34,24,14,24,2,36); p.bezierCurveTo(16,38,22,44,26,52);
+      p.bezierCurveTo(32,46,40,46,50,52); p.bezierCurveTo(60,46,68,46,74,52);
+      p.bezierCurveTo(78,44,84,38,98,36); p.bezierCurveTo(86,24,66,24,50,38); p.closePath(); return p;})()}]],
+  ['laurel','Laurel','Heraldry', () => {
+    const p = P2();
+    p.moveTo(28,12); p.bezierCurveTo(6,32,6,68,28,90);
+    p.moveTo(72,12); p.bezierCurveTo(94,32,94,68,72,90);
+    const l = P2();
+    for (let i=0;i<5;i++){
+      const t=0.1+i*0.2, y=16+t*66, dx=16-10*Math.sin(t*Math.PI);
+      l.moveTo(22-dx*0.2+2, y); l.ellipse(22-dx*0.2+2, y, 9, 4.5, -0.5, 0, Math.PI*2);
+      l.moveTo(78+dx*0.2-2, y); l.ellipse(78+dx*0.2-2, y, 9, 4.5, 0.5, 0, Math.PI*2);
+    }
+    return [{p, stroke:true, lw:5},{p:l, sec:true}];
+  }],
+  ['ball','Football','Sport', () => [
+    {p:circlePath(50,50,45), stroke:true, lw:5},
+    {p:polyPath(ngonPts(5,-Math.PI/2,50,50,20)), sec:true},
+    {p:(()=>{const p=P2(); for(let i=0;i<5;i++){ const a=-Math.PI/2+i*2*Math.PI/5;
+      p.moveTo(50+20*Math.cos(a),50+20*Math.sin(a)); p.lineTo(50+45*Math.cos(a),50+45*Math.sin(a)); } return p;})(),
+      stroke:true, lw:4, sec:true}]],
+  ['hoop','Basketball','Sport', () => [
+    {p:circlePath(50,50,45), stroke:true, lw:5},
+    {p:(()=>{const p=P2(); p.moveTo(50,5); p.lineTo(50,95); p.moveTo(5,50); p.lineTo(95,50);
+      p.moveTo(18,18); p.bezierCurveTo(40,40,40,60,18,82); p.moveTo(82,18); p.bezierCurveTo(60,40,60,60,82,82);
+      return p;})(), stroke:true, lw:4, sec:true}]],
+  ['arrow','Arrow','Marks', () => [{p:polyPath([[44,94],[44,42],[20,42],[50,6],[80,42],[56,42],[56,94]])}]],
+  ['chevron','Chevrons','Marks', () => [{p:(()=>{const p=P2();
+      for (let i=0;i<3;i++){ const y=22+i*24; p.moveTo(14,y+16); p.lineTo(50,y-4); p.lineTo(86,y+16); }
+      return p;})(), stroke:true, lw:8}]],
+  ['cross','Cross','Marks', () => [{p:polyPath([[38,6],[62,6],[62,38],[94,38],[94,62],[62,62],[62,94],[38,94],[38,62],[6,62],[6,38],[38,38]])}]],
+  ['gear','Gear','Marks', () => [{p:(()=>{
+      const outer = polyPath(starPts(10,0.78));
+      return mergePath(outer, circlePath(50,50,17));})(), rule:'evenodd'}]],
+  ['stripes','Bars','Pattern', () => [{p:(()=>{const p=P2();
+      for (let i=0;i<4;i++) p.rect(8, 10+i*22, 84, 13); return p;})()}]],
+  ['dots','Dots','Pattern', () => [{p:(()=>{const p=P2();
+      for (let r=0;r<7;r++) for (let c=0;c<7;c++){ const x=11+c*13, y=11+r*13;
+        p.moveTo(x+4.4,y); p.arc(x,y,4.4,0,Math.PI*2); } return p;})()}]],
+  ['checker','Check','Pattern', () => [{p:(()=>{const p=P2();
+      for (let r=0;r<6;r++) for (let c=0;c<6;c++) if ((r+c)%2===0) p.rect(5+c*15,5+r*15,15,15); return p;})()}]]
+];
+function mergePath(a, b){ const p = P2(); p.addPath(a); p.addPath(b); return p; }
+
+const ART_CACHE = {};
+const ART_MAP = {};
+ART_DEFS.forEach(d => { ART_MAP[d[0]] = { key:d[0], label:d[1], cat:d[2], build:d[3] }; });
+const ART_CATS = [];
+ART_DEFS.forEach(d => { if (ART_CATS.indexOf(d[2]) < 0) ART_CATS.push(d[2]); });
+function artParts(key){
+  if (!ART_CACHE[key]) ART_CACHE[key] = (ART_MAP[key] || ART_MAP.star).build();
+  return ART_CACHE[key];
+}
+function drawArt(ctx, key, size, o){
+  const parts = artParts(key), s = size / 100;
+  ctx.save();
+  ctx.scale(s, s); ctx.translate(-50, -50);
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  for (const part of parts){
+    const col = part.sec ? (o.color2 || o.color) : o.color;
+    if (o.outline || part.stroke){
+      ctx.strokeStyle = col;
+      ctx.lineWidth = part.stroke ? (part.lw || 5) : (o.strokeWidth || 5);
+      ctx.stroke(part.p);
+    } else {
+      ctx.fillStyle = col;
+      ctx.fill(part.p, part.rule || 'nonzero');
+    }
+  }
+  ctx.restore();
+}
+
+/* ------------------------------------------------------------- 3. state */
+const state = {
+  shirt: {
+    body:'#1E2A45', sleeve:'#1E2A45', trim:'#1E2A45', placket:'#1E2A45', button:'#E8E4D8',
+    matchSleeve:true, matchTrim:true, matchPlacket:true,
+    fabric:'pique', fabDepth:55
+  },
+  view: { backdrop:'studio', showArea:true, followArea:true, showShadow:true, spin:false },
+  layers: [],          /* one list for the whole garment; x/y are atlas pixels */
+  focus: 'front',      /* which pattern piece the flat view is looking at */
+  sel: null
+};
+const assets = {};          /* id -> {src, img, w, h, cache:{} } */
+let history = [], hIndex = -1, quiet = false;
+
+/* which pattern piece a point sits on */
+function panelAt(x, y){
+  for (const k of PKEYS){
+    const P = PANELS[k];
+    if (x >= P.x && x <= P.x + P.w && y >= P.y && y <= P.y + P.h) return k;
+  }
+  return null;
+}
+function panelOf(l){
+  return panelAt(l.x, l.y) || l.panel || 'front';
+}
+function homeLayer(l){
+  const k = panelAt(l.x, l.y);
+  if (k) l.panel = k;
+  return l.panel || 'front';
+}
+/* keep a layer somewhere on the garment — never stranded in dead atlas space */
+function clampToCloth(l){
+  if (panelAt(l.x, l.y)) { homeLayer(l); return; }
+  const P = PANELS[l.panel] || PANELS.front;
+  l.x = clamp(l.x, P.x + 2, P.x + P.w - 2);
+  l.y = clamp(l.y, P.y + 2, P.y + P.h - 2);
+}
+
+function newLayer(type){
+  const P = PANELS[state.focus] || PANELS.front;
+  const span = Math.min(P.w, P.h);
+  const base = {
+    id: uid(), type, panel: state.focus, name:'', visible:true, locked:false,
+    x: P.x + P.w/2, y: P.y + P.h/2, rot:0, opacity:1, flipX:false, flipY:false
+  };
+  if (type === 'text') Object.assign(base, {
+    text:'YOUR TEXT', font:'Anton', weight:400, size: Math.round(clamp(span*0.16, 14, 120)),
+    ls:0, lh:1.1, align:'center', color:'#F2F1EC', outline:false,
+    sc:'#12161F', sw:0, curve:0, shadow:false
+  });
+  if (type === 'art') Object.assign(base, {
+    art:'star', size: Math.round(clamp(span*0.4, 16, 300)),
+    color:'#E8B457', color2:'#F2F1EC', outline:false, strokeWidth:5
+  });
+  if (type === 'image') Object.assign(base, {
+    asset:null, scale:1, filter:'none', keyWhite:false, tol:12, contrast:100, bright:100
+  });
+  return base;
+}
+const findLayer = id => state.layers.find(x => x.id === id) || null;
+const selLayer = () => state.sel ? findLayer(state.sel) : null;
+
+/* ------------------------------------------------- 4. 2D print rendering */
+const measure = document.createElement('canvas').getContext('2d');
+
+function fontCSS(l){ return (l.weight || 400) + ' ' + l.size + 'px "' + l.font + '", sans-serif'; }
+
+function textLayout(l){
+  measure.font = fontCSS(l);
+  const raw = String(l.text === undefined ? '' : l.text).split('\n');
+  const lines = []; let maxW = 0;
+  for (const line of raw){
+    const chars = Array.from(line), ws = []; let w = 0;
+    for (const ch of chars){ const cw = measure.measureText(ch).width + l.ls; ws.push(cw); w += cw; }
+    if (chars.length) w -= l.ls;
+    lines.push({ chars, ws, w: Math.max(w, 1) });
+    if (w > maxW) maxW = w;
+  }
+  const lh = l.size * l.lh;
+  return { lines, w: Math.max(maxW, l.size*0.4), h: Math.max(raw.length*lh, lh), lh };
+}
+
+function layerSize(l){
+  if (l.type === 'text'){
+    const L = textLayout(l);
+    if (l.curve && Math.abs(l.curve) > 1){
+      const ang = Math.min(Math.abs(l.curve)/100, 1) * Math.PI * 1.4;
+      const R = L.w / ang;
+      const w = 2 * R * Math.sin(Math.min(ang/2, Math.PI/2));
+      const sag = R * (1 - Math.cos(Math.min(ang/2, Math.PI)));
+      return { w: Math.max(w, L.w*0.2) + l.size*0.4, h: L.h + sag };
+    }
+    return { w: L.w + l.size*0.18, h: L.h };
+  }
+  if (l.type === 'art') return { w: l.size, h: l.size };
+  const a = assets[l.asset];
+  if (!a) return { w: 200, h: 200 };
+  return { w: a.w * l.scale, h: a.h * l.scale };
+}
+
+function drawCurvedLine(ctx, l, ln, yOff){
+  const dir = l.curve > 0 ? 1 : -1;
+  const ang = Math.min(Math.abs(l.curve)/100, 1) * Math.PI * 1.4;
+  const R = ln.w / ang;
+  ctx.save();
+  ctx.translate(0, yOff + dir * R);
+  ctx.textAlign = 'center';
+  let acc = 0;
+  for (let i = 0; i < ln.chars.length; i++){
+    const cw = ln.ws[i];
+    const a = ((acc + cw/2) / ln.w - 0.5) * ang * dir;
+    ctx.save();
+    ctx.rotate(a);
+    ctx.translate(0, -dir * R);
+    if (l.sw > 0){ ctx.lineWidth = l.sw; ctx.strokeStyle = l.sc; ctx.strokeText(ln.chars[i], 0, 0); }
+    if (!l.outline){ ctx.fillStyle = l.color; ctx.fillText(ln.chars[i], 0, 0); }
+    ctx.restore();
+    acc += cw;
+  }
+  ctx.restore();
+  ctx.textAlign = 'left';
+}
+
+function drawTextLayer(ctx, l){
+  const L = textLayout(l);
+  ctx.font = fontCSS(l);
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.miterLimit = 2;
+  if (l.shadow){
+    ctx.shadowColor = 'rgba(0,0,0,.45)';
+    ctx.shadowBlur = l.size * 0.09;
+    ctx.shadowOffsetY = l.size * 0.055;
+    ctx.shadowOffsetX = l.size * 0.03;
+  }
+  const y0 = -L.h/2 + L.lh/2;
+  L.lines.forEach((ln, i) => {
+    const y = y0 + i * L.lh;
+    if (l.curve && Math.abs(l.curve) > 1 && ln.chars.length){ drawCurvedLine(ctx, l, ln, y); return; }
+    let x = l.align === 'left' ? -L.w/2 : l.align === 'right' ? L.w/2 - ln.w : -ln.w/2;
+    for (let c = 0; c < ln.chars.length; c++){
+      const ch = ln.chars[c];
+      if (l.sw > 0){ ctx.lineWidth = l.sw; ctx.strokeStyle = l.sc; ctx.strokeText(ch, x, y); }
+      if (!l.outline){ ctx.fillStyle = l.color; ctx.fillText(ch, x, y); }
+      x += ln.ws[c];
+    }
+  });
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+}
+
+/* remove near-white pixels so a logo on a white box drops out */
+function keyedCanvas(a, tol){
+  const k = 'k' + tol;
+  if (a.cache[k]) return a.cache[k];
+  const c = document.createElement('canvas');
+  c.width = a.w; c.height = a.h;
+  const x = c.getContext('2d');
+  x.drawImage(a.img, 0, 0, a.w, a.h);
+  try {
+    const d = x.getImageData(0, 0, a.w, a.h), px = d.data;
+    const cut = 255 - tol * 2.55;                 /* min channel at or above -> drop */
+    const soft = Math.max(tol * 1.6, 8);          /* feathered band below the cut */
+    for (let i = 0; i < px.length; i += 4){
+      const m = Math.min(px[i], px[i+1], px[i+2]);
+      if (m >= cut) px[i+3] = 0;
+      else if (m > cut - soft) px[i+3] = Math.round(px[i+3] * (cut - m) / soft);
+    }
+    x.putImageData(d, 0, 0);
+  } catch(e){ /* tainted canvas — leave as-is */ }
+  a.cache[k] = c;
+  return c;
+}
+
+function drawImageLayer(ctx, l){
+  const a = assets[l.asset];
+  if (!a || !a.img || !a.img.complete) return;
+  const w = a.w * l.scale, h = a.h * l.scale;
+  const src = l.keyWhite ? keyedCanvas(a, l.tol) : a.img;
+  const f = [];
+  if (l.filter === 'gray') f.push('grayscale(1)');
+  if (l.filter === 'invert') f.push('invert(1)');
+  if (l.filter === 'sepia') f.push('sepia(.75)');
+  if (l.filter === 'mono') f.push('grayscale(1) contrast(320%)');
+  if (l.contrast !== 100) f.push('contrast(' + l.contrast + '%)');
+  if (l.bright !== 100) f.push('brightness(' + l.bright + '%)');
+  if (f.length) ctx.filter = f.join(' ');
+  ctx.drawImage(src, -w/2, -h/2, w, h);
+  ctx.filter = 'none';
+}
+
+function drawLayer(ctx, l){
+  ctx.save();
+  ctx.translate(l.x, l.y);
+  ctx.rotate(l.rot);
+  if (l.flipX || l.flipY) ctx.scale(l.flipX ? -1 : 1, l.flipY ? -1 : 1);
+  ctx.globalAlpha = l.opacity;
+  if (l.type === 'text') drawTextLayer(ctx, l);
+  else if (l.type === 'art') drawArt(ctx, l.art, l.size, l);
+  else drawImageLayer(ctx, l);
+  ctx.restore();
+}
+
+/* Paint one layer into every atlas rect it legitimately reaches: its own
+   pattern piece, plus the piece on the other side of a seam it runs over. */
+function stampLayer(cx, l){
+  const key = panelOf(l), P = PANELS[key];
+  if (!P) return;
+  const put = (rect, dx, dy) => {
+    cx.save();
+    cx.beginPath(); cx.rect(rect.x, rect.y, rect.w, rect.h); cx.clip();
+    cx.translate(dx, dy);
+    drawLayer(cx, l);
+    cx.restore();
+  };
+  put(P, 0, 0);
+  if (P.wrapX){ put(P, -P.w, 0); put(P, P.w, 0); }   /* a closed tube: the sleeve */
+  (P.seams || []).forEach(sm => {
+    const Q = PANELS[sm.to];
+    if (Q) put(Q, sm.dx, sm.dy || 0);                 /* across a real garment seam */
+  });
+}
+
+function renderAtlas(){
+  atlasCx.clearRect(0, 0, ATLAS, ATLAS);
+  atlasCx.drawImage(baseCv, 0, 0);
+  for (const l of state.layers) if (l.visible) stampLayer(atlasCx, l);
+  if (atlasTex) atlasTex.needsUpdate = true;
+  needsRender = true;
+}
+const renderAll = renderAtlas;
+
+/* ==========================================================================
+   5. THE POLO — procedural geometry
+   Units: 1.0 = 10 real inches. Origin at the hem; the group is recentred later.
+   ========================================================================== */
+const V3 = (x,y,z) => new THREE.Vector3(x,y,z);
+
+const G = {
+  TOP: 2.50,          /* side of the shoulder line */
+  CREST: 0.18,        /* extra height at front/back centre */
+  NECK_Y: 2.86, NRX: 0.31, NRZ: 0.275, NECK_Z: 0.02,
+  N_EXP: 2.7,         /* superellipse exponent of the body cross-section */
+  A_KEYS: [1.04, 0.99, 0.99, 1.06, 1.00],   /* half-width, hem -> shoulder  */
+  B_KEYS: [0.45, 0.43, 0.44, 0.49, 0.44],   /* half-depth, hem -> shoulder  */
+  SL_ANG: 44 * DEG,   /* sleeve drop from horizontal */
+  SL_LEN: 0.92,
+  SL_S:  [0.94, 2.06, 0],   /* armhole centre (x mirrored per side) */
+  SL_RA: 0.40, SL_RB: 0.32, /* armhole radii: along the body, and front-to-back */
+  SL_SCALE: [0.09, 0.62, 1.0, 0.90, 0.78, 0.70],  /* taper from the buried tip */
+  FRONT_TOP: 2.00,    /* top of the front/back print area */
+  SLEEVE_U: 0.56      /* print centre along the sleeve axis */
+};
+
+function cat(keys, t){
+  const n = keys.length - 1, x = clamp(t, 0, 1) * n;
+  const i = Math.min(Math.floor(x), n - 1), f = x - i;
+  const p0 = keys[Math.max(i-1,0)], p1 = keys[i], p2 = keys[i+1], p3 = keys[Math.min(i+2,n)];
+  return 0.5 * ((2*p1) + (-p0+p2)*f + (2*p0-5*p1+4*p2-p3)*f*f + (-p0+3*p1-3*p2+p3)*f*f*f);
+}
+const se = (c, n) => (c < 0 ? -1 : 1) * Math.pow(Math.abs(c), 2/n);
+const topYAt = t => G.TOP + G.CREST * Math.pow(Math.abs(Math.sin(t)), 2);
+const profA = v => cat(G.A_KEYS, v);
+const profB = v => cat(G.B_KEYS, v);
+
+function torsoAt(t, v){
+  const a = profA(v), b = profB(v);
+  return V3(a * se(Math.cos(t), G.N_EXP), v * topYAt(t), b * se(Math.sin(t), G.N_EXP));
+}
+function torsoAtY(t, y){
+  const v = clamp(y / topYAt(t), 0, 1), a = profA(v), b = profB(v);
+  return V3(a * se(Math.cos(t), G.N_EXP), y, b * se(Math.sin(t), G.N_EXP));
+}
+function torsoNormal(t, y){
+  const v = clamp(y / topYAt(t), 0, 1), a = profA(v), b = profB(v), n = G.N_EXP;
+  const p = torsoAtY(t, y);
+  const gx = (p.x < 0 ? -1 : 1) * Math.pow(Math.abs(p.x / a), n - 1) / a;
+  const gz = (p.z < 0 ? -1 : 1) * Math.pow(Math.abs(p.z / b), n - 1) / b;
+  const v3 = V3(gx, 0, gz);
+  if (v3.lengthSq() < 1e-9) v3.set(0, 0, 1);
+  return v3.normalize();
+}
+const neckAt = t => V3(G.NRX * Math.cos(t), G.NECK_Y, G.NRZ * Math.sin(t) + G.NECK_Z);
+/* s = 0 at the neck ring, 1 at the top edge of the torso */
+function yokeAt(t, s){
+  const n = neckAt(t), e = torsoAt(t, 1);
+  const p = V3(lerp(n.x, e.x, s), lerp(n.y, e.y, s), lerp(n.z, e.z, s));
+  p.y += 0.04 * Math.sin(Math.PI * s) * Math.abs(Math.cos(t));
+  return p;
+}
+function sleeveFrame(side){
+  const d = V3(side * Math.cos(G.SL_ANG), -Math.sin(G.SL_ANG), 0);
+  const e1 = V3(side * Math.sin(G.SL_ANG), Math.cos(G.SL_ANG), 0);
+  const e2 = V3(0, 0, 1);
+  return { d, e1, e2, S: V3(side * G.SL_S[0], G.SL_S[1], G.SL_S[2]) };
+}
+const sleeveScale = u => cat(G.SL_SCALE, (u + 0.42) / 1.42);
+function sleeveAt(side, u, t){
+  const F = sleeveFrame(side), k = sleeveScale(u);
+  const rA = G.SL_RA * k, rB = G.SL_RB * k;
+  const c = Math.cos(t), s = Math.sin(t);
+  return V3(
+    F.S.x + F.d.x * G.SL_LEN * u + F.e1.x * rA * c + F.e2.x * rB * s,
+    F.S.y + F.d.y * G.SL_LEN * u + F.e1.y * rA * c + F.e2.y * rB * s,
+    F.S.z + F.d.z * G.SL_LEN * u + F.e1.z * rA * c + F.e2.z * rB * s
+  );
+}
+function sleeveNormal(side, u, t){
+  const F = sleeveFrame(side), k = sleeveScale(u);
+  const nx = Math.cos(t) / (G.SL_RA * k), nz = Math.sin(t) / (G.SL_RB * k);
+  return V3(F.e1.x*nx + F.e2.x*nz, F.e1.y*nx + F.e2.y*nz, F.e1.z*nx + F.e2.z*nz).normalize();
+}
+
+/* Build a quad grid. `rect` is the atlas rectangle (in atlas pixels) that this
+   surface unwraps onto, so the mesh reads straight out of the shared texture. */
+function surf(rows, rect, o){
+  o = o || {};
+  const M = rows.length, N = rows[0].length;
+  const pos = new Float32Array(M*N*3), uvs = new Float32Array(M*N*2);
+  const nrm = o.normals ? new Float32Array(M*N*3) : null;
+  const idx = [];
+  const R = rect || { x:0, y:0, w:0, h:0 };
+  for (let i = 0; i < M; i++) for (let j = 0; j < N; j++){
+    const k = i*N + j, p = rows[i][j];
+    pos[k*3] = p.x; pos[k*3+1] = p.y; pos[k*3+2] = p.z;
+    if (nrm){ const n = o.normals[i][j]; nrm[k*3] = n.x; nrm[k*3+1] = n.y; nrm[k*3+2] = n.z; }
+    let fu = N > 1 ? j/(N-1) : 0, fv = M > 1 ? i/(M-1) : 0;
+    if (o.uFlip) fu = 1 - fu;
+    if (o.vFlip) fv = 1 - fv;
+    uvs[k*2]   = (R.x + fu*R.w) / ATLAS;
+    uvs[k*2+1] = 1 - (R.y + fv*R.h) / ATLAS;
+  }
+  for (let i = 0; i < M-1; i++) for (let j = 0; j < N-1; j++){
+    const a = i*N+j, b = a+1, c = (i+1)*N+j, d = c+1;
+    idx.push(a, b, d, a, d, c);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+  g.setIndex(idx);
+  if (nrm) g.setAttribute('normal', new THREE.BufferAttribute(nrm, 3));
+  else g.computeVertexNormals();
+  return g;
+}
+const buildSurface = rows => surf(rows, null);
+
+/* Normals for a grid whose columns run around a closed ring. Computed on the
+   full ring so a panel can be split in two without a shading crease on the seam. */
+function ringNormals(rows, dupEnd, ref){
+  const M = rows.length, N = rows[0].length, P = dupEnd ? N-1 : N, out = [];
+  const A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3();
+  for (let i = 0; i < M; i++){
+    const r = [];
+    for (let j = 0; j < N; j++){
+      const jm = ((j-1)%P + P)%P, jp = (j+1)%P;
+      const im = Math.max(i-1, 0), ip = Math.min(i+1, M-1);
+      A.subVectors(rows[i][jp], rows[i][jm]);
+      B.subVectors(rows[ip][j], rows[im][j]);
+      C.crossVectors(A, B);
+      if (C.lengthSq() < 1e-12) C.set(0, 1, 0);
+      r.push(C.clone().normalize());
+    }
+    out.push(r);
+  }
+  const i0 = Math.floor(M/2), j0 = Math.floor(N/4), p0 = rows[i0][j0];
+  const want = ref ? ref(p0, i0, j0) : V3(p0.x, 0, p0.z);
+  if (want.lengthSq() > 1e-9 && out[i0][j0].dot(want) < 0)
+    out.forEach(r => r.forEach(n => n.negate()));
+  return out;
+}
+
+/* slice columns a..b inclusive out of a ring grid */
+const cols = (rows, a, b) => rows.map(r => r.slice(a, b+1));
+const subRect = (P, y0, y1) => ({ x:P.x, y:P.y + P.h*y0, w:P.w, h:P.h*(y1-y0) });
+
+/* ----- atlas layout ---------------------------------------------------- */
+const SL_U0 = -0.46, SL_U1 = 0.88;
+const COL_GAP = 17 * DEG;
+const COL_T0 = Math.PI/2 + COL_GAP, COL_T1 = Math.PI*2 + Math.PI/2 - COL_GAP;
+const PLK_W = 0.082, PLK_Y0 = 1.96;
+
+function arcLen(fn, a, b, n){
+  let L = 0, prev = fn(a);
+  for (let i = 1; i <= n; i++){ const q = fn(a + (b-a)*i/n); L += q.distanceTo(prev); prev = q; }
+  return L;
+}
+/* sleeve row parameter: the buried root is squeezed into the top sliver */
+const sleeveU = f => f < 0.08 ? lerp(SL_U0, 0, f/0.08) : lerp(0, SL_U1, (f-0.08)/0.92);
+
+function layoutAtlas(){
+  /* measure the garment in world units (1 unit = 10 real inches) */
+  let bodyHalf = 0;
+  for (let v = 0.1; v <= 1.0; v += 0.15)
+    bodyHalf = Math.max(bodyHalf, arcLen(t => torsoAt(t, v), 0, Math.PI, 150));
+  const bodyH = arcLen(v => torsoAt(0, v), 0, 1, 60);
+  let yokeH = 0;
+  for (let t = 0; t < Math.PI*2; t += Math.PI/6)
+    yokeH = Math.max(yokeH, arcLen(s => yokeAt(t, s), 0, 1, 40));
+  const slCirc = arcLen(t => sleeveAt(1, 0.05, t), 0, Math.PI*2, 150);
+  const slLen  = arcLen(f => sleeveAt(1, sleeveU(f), Math.PI/2), 0, 1, 60);
+  const colLen = arcLen(t => neckAt(t), COL_T0, COL_T1, 200);
+  const colW   = 0.40;
+  const cufC   = arcLen(t => sleeveAt(1, 0.93, t), 0, Math.PI*2, 120);
+  const cufH   = 0.22;
+  const panelH = yokeH + bodyH;
+
+  const meta = {
+    front:   ['Front',        bodyHalf, panelH, false],
+    back:    ['Back',         bodyHalf, panelH, false],
+    sleeveL: ['Left sleeve',  slCirc,   slLen,  true ],
+    sleeveR: ['Right sleeve', slCirc,   slLen,  true ],
+    placket: ['Placket',      0.20,     0.98,   false],
+    collar:  ['Collar',       colLen,   colW,   false],
+    cuffL:   ['Left cuff',    cufC,     cufH,   true ],
+    cuffR:   ['Right cuff',   cufC,     cufH,   true ]
+  };
+  const shelves = [['front','back'], ['sleeveL','sleeveR','placket'], ['collar','cuffL','cuffR']];
+
+  const GUT = 0.14;                         /* 1.4 in of gutter between pieces */
+  let W = 0, H = 0;
+  shelves.forEach(sh => {
+    let w = 0, h = 0;
+    sh.forEach((k, i) => { w += meta[k][1] + (i ? GUT : 0); h = Math.max(h, meta[k][2]); });
+    W = Math.max(W, w); H += h + GUT;
+  });
+  const pad = 14;
+  PPU = (ATLAS - pad*2) / Math.max(W, H);
+
+  PANELS = {}; PKEYS = [];
+  let y = pad;
+  shelves.forEach(sh => {
+    let x = pad, hh = 0;
+    sh.forEach(k => {
+      const m = meta[k];
+      const w = m[1]*PPU, h = m[2]*PPU;
+      PANELS[k] = { key:k, label:m[0], x:Math.round(x), y:Math.round(y),
+                    w:Math.round(w), h:Math.round(h), wrapX:m[3], seams:[] };
+      PKEYS.push(k);
+      x += w + GUT*PPU; hh = Math.max(hh, h);
+    });
+    y += hh + GUT*PPU;
+  });
+
+  /* the two body panels meet at the side seams, so artwork may run across them:
+     front u=1 joins back u=0, and front u=0 joins back u=1 */
+  const F = PANELS.front, B = PANELS.back;
+  F.seams = [{ to:'back', dx: B.x - F.x - F.w }, { to:'back', dx: B.x - F.x + B.w }];
+  B.seams = [{ to:'front', dx: F.x - B.x - B.w }, { to:'front', dx: F.x - B.x + F.w }];
+  F.yokeFrac = B.yokeFrac = yokeH / panelH;
+}
+
+/* ----- fabric textures ------------------------------------------------- */
+function fabricCanvas(kind){
+  const S = 256, c = document.createElement('canvas');
+  c.width = c.height = S;
+  const x = c.getContext('2d');
+  x.fillStyle = '#ffffff'; x.fillRect(0, 0, S, S);
+  if (kind === 'pique'){
+    const step = 16;
+    for (let r = -1; r < S/step + 1; r++) for (let q = -1; q < S/step + 1; q++){
+      const ox = q*step + (r % 2 ? step/2 : 0), oy = r*step;
+      x.fillStyle = '#d2d2d2';
+      x.beginPath();
+      x.moveTo(ox + step/2, oy + 2); x.lineTo(ox + step - 2, oy + step/2);
+      x.lineTo(ox + step/2, oy + step - 2); x.lineTo(ox + 2, oy + step/2);
+      x.closePath(); x.fill();
+      x.fillStyle = '#ffffff';
+      x.beginPath();
+      x.moveTo(ox + step/2, oy + 5); x.lineTo(ox + step - 5, oy + step/2);
+      x.lineTo(ox + step/2, oy + step - 5); x.lineTo(ox + 5, oy + step/2);
+      x.closePath(); x.fill();
+    }
+  } else if (kind === 'jersey'){
+    for (let i = 0; i < S; i += 4){
+      x.fillStyle = 'rgba(190,190,190,.85)'; x.fillRect(0, i, S, 1.4);
+    }
+    for (let i = 0; i < S; i += 7){
+      x.fillStyle = 'rgba(205,205,205,.5)'; x.fillRect(i, 0, 1.2, S);
+    }
+  } else if (kind === 'heather'){
+    const img = x.getImageData(0, 0, S, S), px = img.data;
+    for (let i = 0; i < px.length; i += 4){
+      const n = 226 + Math.random()*29;
+      px[i] = px[i+1] = px[i+2] = n;
+    }
+    x.putImageData(img, 0, 0);
+    for (let i = 0; i < 1800; i++){
+      x.strokeStyle = 'rgba(' + (Math.random() > .5 ? '150,150,150' : '255,255,255') + ',.5)';
+      x.lineWidth = 1;
+      const px0 = Math.random()*S, py0 = Math.random()*S, a = Math.random()*Math.PI;
+      x.beginPath(); x.moveTo(px0, py0);
+      x.lineTo(px0 + Math.cos(a)*7, py0 + Math.sin(a)*7); x.stroke();
+    }
+  }
+  return c;
+}
+function ribCanvas(){
+  const S = 64, c = document.createElement('canvas');
+  c.width = c.height = S;
+  const x = c.getContext('2d');
+  x.fillStyle = '#ffffff'; x.fillRect(0, 0, S, S);
+  for (let i = 0; i < S; i += 6){ x.fillStyle = '#c4c4c4'; x.fillRect(i, 0, 2.6, S); }
+  return c;
+}
+function repeatTex(canvas){
+  const t = new THREE.CanvasTexture(canvas);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.encoding = THREE.sRGBEncoding;
+  return t;
+}
+
+/* ----- scene ----------------------------------------------------------- */
+let renderer, scene, camera, shirt, ground, needsRender = true;
+let PAINTABLE = [];   /* meshes a design can be dropped onto, straight on the model */
+const MAT = {};
+const PART = {};
+const BACKDROPS = {
+  studio: ['#EDEBE3', '#C6C4BC', 0.16],
+  paper:  ['#E4E7E2', '#C2C9C6', 0.13],
+  slate:  ['#2E3340', '#1A1E28', 0.34],
+  denim:  ['#2A3A5E', '#151E33', 0.30]
+};
+
+function srgb(hex){ return new THREE.Color(hex).convertSRGBToLinear(); }
+function shade(hex, k){
+  const c = new THREE.Color(hex);
+  const hsl = { h:0, s:0, l:0 };
+  c.getHSL(hsl);
+  c.setHSL(hsl.h, hsl.s, clamp(hsl.l * k, 0, 1));
+  return c.convertSRGBToLinear();
+}
+
+function makeFabricMat(opts){
+  const m = new THREE.MeshStandardMaterial({
+    color: 0xffffff, roughness: 0.86, metalness: 0.0, side: THREE.DoubleSide
+  });
+  Object.assign(m, opts || {});
+  return m;
+}
+
+function buildModel(){
+  shirt = new THREE.Group();
+  PAINTABLE = [];
+
+  MAT.garment = makeFabricMat();
+  MAT.trim    = makeFabricMat({ roughness: 0.92 });
+  MAT.button  = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.34, metalness: 0.05 });
+  MAT.inner   = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 1, side: THREE.DoubleSide });
+  MAT.groove  = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 1, side: THREE.DoubleSide });
+
+  const add = (geom, mat, paint) => {
+    const m = new THREE.Mesh(geom, mat);
+    shirt.add(m);
+    if (paint) PAINTABLE.push(m);
+    return m;
+  };
+
+  const N = 121, H = (N-1)/2;            /* column 0 = right side, 60 = left side */
+  const F = PANELS.front, B = PANELS.back;
+
+  /* --- torso: one ring, split down the side seams into two pattern pieces --- */
+  const M = 56, ring = [];
+  for (let i = 0; i < M; i++){
+    const v = 1 - i/(M-1), row = [];
+    for (let j = 0; j < N; j++) row.push(torsoAt(j/(N-1)*Math.PI*2, v));
+    ring.push(row);
+  }
+  const ringN = ringNormals(ring, true);
+  PART.torsoF = add(surf(cols(ring, 0, H), subRect(F, F.yokeFrac, 1),
+                         { normals: cols(ringN, 0, H) }), MAT.garment, true);
+  PART.torsoB = add(surf(cols(ring, H, N-1), subRect(B, B.yokeFrac, 1),
+                         { normals: cols(ringN, H, N-1) }), MAT.garment, true);
+
+  /* hem cap so you cannot see up inside the shirt */
+  const hemRow = ring[M-1];
+  add(buildSurface([hemRow, hemRow.map(p => V3(p.x*0.55, 0.02, p.z*0.55)),
+                    hemRow.map(() => V3(0, 0.05, 0))]), MAT.inner, false);
+
+  /* --- yoke: torso top edge up to the neck ring, same two pieces --- */
+  const YM = 20, yoke = [];
+  for (let i = 0; i < YM; i++){
+    const sv = i/(YM-1), row = [];
+    for (let j = 0; j < N; j++) row.push(yokeAt(j/(N-1)*Math.PI*2, sv));
+    yoke.push(row);
+  }
+  const yokeN = ringNormals(yoke, true, p => V3(p.x*0.5, 1, p.z*0.5));
+  PART.yokeF = add(surf(cols(yoke, 0, H), subRect(F, 0, F.yokeFrac),
+                        { normals: cols(yokeN, 0, H) }), MAT.garment, true);
+  PART.yokeB = add(surf(cols(yoke, H, N-1), subRect(B, 0, B.yokeFrac),
+                        { normals: cols(yokeN, H, N-1) }), MAT.garment, true);
+
+  /* --- neck facing + blocker --- */
+  const fRows = [];
+  for (let i = 0; i < 4; i++){
+    const sv = i/3, row = [];
+    for (let j = 0; j < N; j++){
+      const t = j/(N-1) * Math.PI*2, n = neckAt(t), k = 1 - 0.16*sv;
+      row.push(V3(n.x*k, G.NECK_Y - 0.19*sv, (n.z - G.NECK_Z)*k + G.NECK_Z));
+    }
+    fRows.push(row);
+  }
+  fRows.push(fRows[3].map(p => V3(p.x*0.5, G.NECK_Y - 0.24, (p.z - G.NECK_Z)*0.5 + G.NECK_Z)));
+  fRows.push(fRows[3].map(() => V3(0, G.NECK_Y - 0.26, G.NECK_Z)));
+  add(buildSurface(fRows), MAT.inner, false);
+
+  /* --- sleeves: UV seam parked under the arm, so the outer face is unbroken --- */
+  PART.sleeves = []; PART.cuffs = [];
+  [-1, 1].forEach(side => {
+    const SP = PANELS[side < 0 ? 'sleeveL' : 'sleeveR'];
+    const CP = PANELS[side < 0 ? 'cuffL' : 'cuffR'];
+    const SM = 34, SN = 61;
+    const ang = j => Math.PI + j/(SN-1) * Math.PI*2;
+    const rows = [];
+    for (let i = 0; i < SM; i++){
+      const u = sleeveU(i/(SM-1)), row = [];
+      for (let j = 0; j < SN; j++) row.push(sleeveAt(side, u, ang(j)));
+      rows.push(row);
+    }
+    rows[0] = rows[0].map(() =>
+      sleeveAt(side, SL_U0, 0).lerp(sleeveAt(side, SL_U0, Math.PI), 0.5));
+    const nrm = ringNormals(rows, true,
+      (p, i, j) => sleeveNormal(side, sleeveU(Math.max(i, 1)/(SM-1)), ang(j)));
+    PART.sleeves.push(add(surf(rows, SP, { normals: nrm }), MAT.garment, true));
+
+    /* ribbed cuff */
+    const cu = i => lerp(0.86, 1.0, i/4);
+    const cRows = [];
+    for (let i = 0; i < 5; i++){
+      const row = [];
+      for (let j = 0; j < SN; j++){
+        const t = ang(j), q = sleeveAt(side, cu(i), t), n = sleeveNormal(side, cu(i), t);
+        const puff = 0.014 * (1 - Math.abs(i/4 - 0.5)*1.2);
+        row.push(V3(q.x + n.x*puff, q.y + n.y*puff, q.z + n.z*puff));
+      }
+      cRows.push(row);
+    }
+    const cn = ringNormals(cRows, true, (p, i, j) => sleeveNormal(side, cu(i), ang(j)));
+    PART.cuffs.push(add(surf(cRows, CP, { normals: cn }), MAT.trim, true));
+
+    /* inside of the cuff, rolled under */
+    const iRows = [cRows[4]];
+    iRows.push(cRows[4].map(p => {
+      const c = sleeveAt(side, 1.0, 0).lerp(sleeveAt(side, 1.0, Math.PI), 0.5);
+      return V3(lerp(p.x, c.x, .55), lerp(p.y, c.y, .55), lerp(p.z, c.z, .55));
+    }));
+    iRows.push(cRows[4].map(() => sleeveAt(side, 0.985, 0).lerp(sleeveAt(side, 0.985, Math.PI), 0.5)));
+    add(buildSurface(iRows), MAT.inner, false);
+  });
+
+  /* --- collar --- */
+  const CN = 161, CM = 11, colRows = [];
+  const sOutAt = t => {
+    const d = Math.min(Math.abs(t - COL_T0), Math.abs(t - COL_T1)) / DEG;
+    const k = clamp(d / 55, 0, 1);
+    return lerp(0.56, 0.31, k*k*(3 - 2*k));
+  };
+  for (let i = 0; i < CM; i++){
+    const sv = i/(CM-1), row = [];
+    for (let j = 0; j < CN; j++){
+      const t = lerp(COL_T0, COL_T1, j/(CN-1));
+      const A = neckAt(t), O = yokeAt(t, sOutAt(t));
+      const lift = 0.10 * Math.exp(-Math.pow((sv - 0.2)/0.3, 2));
+      row.push(V3(lerp(A.x, O.x, sv), lerp(A.y, O.y, sv) + lift + 0.012*(1-sv), lerp(A.z, O.z, sv)));
+    }
+    colRows.push(row);
+  }
+  PART.collar = add(surf(colRows, PANELS.collar, { vFlip:true }), MAT.trim, true);
+
+  /* --- placket --- */
+  const PM = 30, PN = 13, pRows = [];
+  for (let i = 0; i < PM; i++){
+    const f = i/(PM-1);
+    let C, ny;
+    if (f < 0.32){                                  /* neck -> top edge of the torso */
+      const sv = lerp(0.07, 1.0, f/0.32);
+      C = yokeAt(Math.PI/2, sv); ny = 0.6 * (1 - sv);
+    } else {                                        /* straight down the chest */
+      C = torsoAtY(Math.PI/2, lerp(topYAt(Math.PI/2), PLK_Y0, (f - 0.32)/0.68)); ny = 0;
+    }
+    const taper = f > 0.93 ? lerp(1, 0.4, (f - 0.93)/0.07) : 1;
+    const n = V3(0, ny, 1).normalize(), row = [];
+    for (let j = 0; j < PN; j++){
+      const x = lerp(-PLK_W, PLK_W, j/(PN-1)) * taper;
+      row.push(V3(x, C.y + n.y*0.017, C.z - (x*x)/0.9 + n.z*0.017));
+    }
+    pRows.push(row);
+  }
+  PART.placket = add(surf(pRows, PANELS.placket), MAT.garment, true);
+
+  /* the opening down the middle of the placket */
+  const mid = Math.floor(PN/2);
+  add(buildSurface(pRows.map(r => {
+    const a = r[mid], w = 0.0085;
+    return [V3(a.x - w, a.y, a.z + 0.003), V3(a.x + w, a.y, a.z + 0.003)];
+  })), MAT.groove, false);
+
+  /* buttons */
+  PART.buttons = [];
+  [2.60, 2.40, 2.20].forEach(by => {
+    const q = torsoAtY(Math.PI/2, by);
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.030, 0.030, 0.012, 20), MAT.button);
+    m.position.set(0, q.y, q.z + 0.036);
+    m.rotation.x = Math.PI/2;
+    shirt.add(m); PART.buttons.push(m);
+  });
+
+  shirt.position.y = -1.42;
+  scene.add(shirt);
+}
+
+/* ---------------------------------------------- 6. scene, lights, camera */
+const cam = { theta:0, phi:Math.PI*0.5, radius:5.9, tx:0, ty:0,
+              gTheta:0, gPhi:Math.PI*0.5, gRadius:5.9, gtx:0, gty:0 };
+let intro = 0;
+
+function initThree(){
+  const host = $('#viewport');
+  renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false, preserveDrawingBuffer:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.NoToneMapping;
+  host.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(31, 1, 0.1, 100);
+
+  scene.add(new THREE.HemisphereLight(0xdde6ff, 0x3a3f52, 0.62));
+  const key = new THREE.DirectionalLight(0xfff6e8, 0.92); key.position.set(3.2, 5.0, 4.4);
+  const fill = new THREE.DirectionalLight(0xdfe9ff, 0.34); fill.position.set(-4.6, 1.8, 3.2);
+  const rim = new THREE.DirectionalLight(0xffffff, 0.46); rim.position.set(-1.8, 3.4, -5.2);
+  const rim2 = new THREE.DirectionalLight(0xffffff, 0.22); rim2.position.set(2.6, 1.2, -4.4);
+  scene.add(key, fill, rim, rim2);
+
+  /* soft contact shadow */
+  const sc = document.createElement('canvas'); sc.width = sc.height = 256;
+  const sx = sc.getContext('2d');
+  const grd = sx.createRadialGradient(128, 128, 6, 128, 128, 126);
+  grd.addColorStop(0, 'rgba(0,0,0,.55)');
+  grd.addColorStop(0.45, 'rgba(0,0,0,.24)');
+  grd.addColorStop(1, 'rgba(0,0,0,0)');
+  sx.fillStyle = grd; sx.fillRect(0, 0, 256, 256);
+  const stex = new THREE.CanvasTexture(sc);
+  ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.4, 2.4),
+    new THREE.MeshBasicMaterial({ map: stex, transparent: true, depthWrite: false, opacity: 0.5 })
+  );
+  ground.rotation.x = -Math.PI/2;
+  ground.position.y = -1.55;
+  ground.renderOrder = 0;
+  scene.add(ground);
+
+  atlasTex = new THREE.CanvasTexture(atlasCv);
+  atlasTex.encoding = THREE.sRGBEncoding;
+  atlasTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+  buildModel();
+  applyBackdrop();
+  applyShirt();
+  resize();
+  bindOrbit(renderer.domElement);
+  new ResizeObserver(resize).observe(host);
+
+  /* one orchestrated turn on arrival, then it stays put */
+  intro = 1;
+  cam.theta = -0.55; cam.gTheta = 0;
+  cam.radius = 7.4; cam.gRadius = 5.9;
+  loop();
+}
+
+function resize(){
+  const host = $('#viewport');
+  const w = host.clientWidth || 640, h = host.clientHeight || 480;
+  renderer.setSize(w, h, false);
+  camera.aspect = w/h;
+  camera.fov = w/h < 0.95 ? 38 : 31;
+  camera.updateProjectionMatrix();
+  needsRender = true;
+}
+
+function applyBackdrop(){
+  const b = BACKDROPS[state.view.backdrop] || BACKDROPS.studio;
+  $('#stage').style.background = 'linear-gradient(180deg,' + b[0] + ',' + b[1] + ')';
+  scene.background = null;
+  ground.material.opacity = state.view.showShadow ? b[2] * 3 : 0;
+  const dark = state.view.backdrop === 'slate' || state.view.backdrop === 'denim';
+  document.documentElement.style.setProperty('--sweep-a', b[0]);
+  document.documentElement.style.setProperty('--sweep-b', b[1]);
+  $$('.stagetag b, .stagetag span, .hint').forEach(el => {
+    el.style.color = dark ? 'rgba(255,255,255,.62)' : '';
+  });
+  needsRender = true;
+}
+
+let weaveTex = null, fabKind = null, ribTex = null;
+
+/* which garment colour a pattern piece is cut from */
+function panelInk(k){
+  const S = state.shirt;
+  if (k === 'sleeveL' || k === 'sleeveR') return S.matchSleeve ? S.body : S.sleeve;
+  if (k === 'collar' || k === 'cuffL' || k === 'cuffR') return S.matchTrim ? S.body : S.trim;
+  if (k === 'placket') return S.matchPlacket ? S.body : S.placket;
+  return S.body;
+}
+
+/* the cloth itself: every pattern piece filled with its colour, seams shaded in */
+function renderBase(){
+  const x = baseCx;
+  x.clearRect(0, 0, ATLAS, ATLAS);
+  x.fillStyle = '#0E1116'; x.fillRect(0, 0, ATLAS, ATLAS);
+  PKEYS.forEach(k => {
+    const P = PANELS[k];
+    x.fillStyle = panelInk(k);
+    x.fillRect(P.x, P.y, P.w, P.h);
+    const g = Math.max(4, Math.round(PPU * 0.016));
+    x.save();
+    x.beginPath(); x.rect(P.x, P.y, P.w, P.h); x.clip();
+    x.strokeStyle = 'rgba(0,0,0,.22)'; x.lineWidth = g;
+    x.strokeRect(P.x + g/2, P.y + g/2, P.w - g, P.h - g);
+    x.strokeStyle = 'rgba(255,255,255,.07)'; x.lineWidth = 1.6;
+    x.strokeRect(P.x + g + 2, P.y + g + 2, P.w - 2*g - 4, P.h - 2*g - 4);
+    x.restore();
+  });
+}
+
+function applyShirt(){
+  const S = state.shirt;
+  MAT.button.color.copy(srgb(S.button));
+  MAT.inner.color.copy(shade(S.body, 0.34));
+  MAT.groove.color.copy(shade(panelInk('placket'), 0.30));
+
+  renderBase();
+  renderAtlas();
+
+  if (fabKind !== S.fabric){
+    if (weaveTex) weaveTex.dispose();
+    weaveTex = repeatTex(fabricCanvas(S.fabric));
+    fabKind = S.fabric;
+  }
+  if (!ribTex) ribTex = repeatTex(ribCanvas());
+
+  /* the atlas has even texel density, so one repeat gives one weave scale
+     over the entire garment — body, sleeves and placket all match */
+  const rep = (ATLAS / PPU) / 0.055;
+  const depth = S.fabDepth / 100;
+  const none = S.fabric === 'smooth';
+
+  weaveTex.repeat.set(rep, rep);
+  MAT.garment.map = atlasTex;
+  MAT.garment.bumpMap = none ? null : weaveTex;
+  MAT.garment.bumpScale = 0.016 * depth;
+  MAT.garment.color.setRGB(1, 1, 1);
+  MAT.garment.needsUpdate = true;
+
+  ribTex.repeat.set(rep * 0.45, 1);
+  MAT.trim.map = atlasTex;
+  MAT.trim.bumpMap = ribTex;
+  MAT.trim.bumpScale = 0.013 * Math.max(depth, 0.4);
+  MAT.trim.color.setRGB(1, 1, 1);
+  MAT.trim.needsUpdate = true;
+
+  needsRender = true;
+}
+
+function updateOutlines(){ renderEditor(); needsRender = true; }
+
+/* ----- orbit, and dragging designs straight onto the model -------------- */
+const RAY = new THREE.Raycaster();
+/* where on the atlas is the fabric under the cursor? */
+function pickAtlas(e){
+  if (!PAINTABLE.length || !renderer) return null;
+  const r = renderer.domElement.getBoundingClientRect();
+  RAY.setFromCamera({ x:((e.clientX - r.left)/r.width)*2 - 1,
+                      y:-((e.clientY - r.top)/r.height)*2 + 1 }, camera);
+  const hit = RAY.intersectObjects(PAINTABLE, false)[0];
+  if (!hit || !hit.uv) return null;
+  return { x: hit.uv.x * ATLAS, y: (1 - hit.uv.y) * ATLAS };
+}
+
+function bindOrbit(el){
+  const pts = new Map();
+  let mode = null, lx = 0, ly = 0, pinch = 0, paint = null;
+  el.style.touchAction = 'none';
+  el.addEventListener('contextmenu', e => e.preventDefault());
+
+  el.addEventListener('pointerdown', e => {
+    el.setPointerCapture(e.pointerId);
+    pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    lx = e.clientX; ly = e.clientY;
+    if (pts.size === 2){
+      const v = Array.from(pts.values());
+      pinch = Math.hypot(v[0].x - v[1].x, v[0].y - v[1].y);
+      mode = 'pinch';
+    } else {
+      intro = 0;
+      state.view.spin = false; $('#btnSpin').classList.remove('on');
+      mode = (e.button === 2 || e.ctrlKey) ? 'pan' : 'turn';
+      /* grabbed a design on the garment? then move that, not the camera */
+      if (e.button === 0){
+        const a = pickAtlas(e);
+        const l = a && hitLayer(a);
+        if (l){
+          if (state.sel !== l.id){ state.sel = l.id; renderLayers(); renderProps(); }
+          mode = 'paint';
+          paint = { id:l.id, a, lx:l.x, ly:l.y, rot0:l.rot, base:layerBase(l),
+                    panel:panelOf(l), sy:e.clientY, sx:e.clientX,
+                    alt:e.altKey, shift:e.shiftKey };
+          el.style.cursor = 'grabbing';
+          renderEditor();
+        }
+      }
+    }
+  });
+  el.addEventListener('pointermove', e => {
+    if (!pts.has(e.pointerId)) return;
+    pts.set(e.pointerId, { x:e.clientX, y:e.clientY });
+    if (mode === 'pinch' && pts.size === 2){
+      const v = Array.from(pts.values());
+      const d = Math.hypot(v[0].x - v[1].x, v[0].y - v[1].y);
+      if (pinch > 0) cam.gRadius = clamp(cam.gRadius * (pinch/d), 2.6, 13);
+      pinch = d; needsRender = true; return;
+    }
+    if (mode === 'paint' && paint){
+      const l = findLayer(paint.id);
+      if (!l){ mode = null; return; }
+      if (paint.alt){
+        let r = paint.rot0 + (e.clientX - paint.sx) * 0.012;
+        if (e.shiftKey) r = Math.round(r / (15*DEG)) * (15*DEG);
+        l.rot = r;
+      } else if (paint.shift){
+        setBase(l, paint.base * Math.exp((paint.sy - e.clientY) * 0.006));
+      } else {
+        const b = pickAtlas(e);
+        if (b){
+          const k = panelAt(b.x, b.y);
+          if (k && k !== paint.panel){        /* dragged onto another pattern piece */
+            paint.panel = k; paint.a = b; paint.lx = b.x; paint.ly = b.y;
+            l.panel = k; l.x = b.x; l.y = b.y;
+          } else if (k){
+            l.x = paint.lx + (b.x - paint.a.x);
+            l.y = paint.ly + (b.y - paint.a.y);
+          }
+          clampToCloth(l);
+        }
+      }
+      afterEdit(false);
+      return;
+    }
+    const dx = e.clientX - lx, dy = e.clientY - ly;
+    lx = e.clientX; ly = e.clientY;
+    if (mode === 'pan'){
+      cam.gtx = clamp(cam.gtx - dx * cam.gRadius * 0.00042, -1.6, 1.6);
+      cam.gty = clamp(cam.gty + dy * cam.gRadius * 0.00042, -1.4, 1.4);
+    } else if (mode === 'turn'){
+      cam.gTheta -= dx * 0.0072;
+      cam.gPhi = clamp(cam.gPhi - dy * 0.0062, Math.PI*0.2, Math.PI*0.84);
+    }
+    needsRender = true;
+  });
+  const up = e => {
+    pts.delete(e.pointerId);
+    if (mode === 'paint'){ paint = null; el.style.cursor = ''; push(); }
+    if (pts.size < 2) mode = pts.size ? 'turn' : null;
+  };
+  el.addEventListener('pointerup', up);
+  el.addEventListener('pointercancel', up);
+  el.addEventListener('wheel', e => {
+    e.preventDefault();
+    intro = 0;
+    cam.gRadius = clamp(cam.gRadius * Math.exp(e.deltaY * 0.0011), 2.6, 13);
+    needsRender = true;
+  }, { passive:false });
+}
+
+const FACE = {
+  front:  { th:0,       phi:0.50, r:5.9, tx:0,     ty:0     },
+  back:   { th:Math.PI, phi:0.50, r:5.9, tx:0,     ty:0     },
+  sleeveL:{ th:-0.62,   phi:0.47, r:4.3, tx:0.28,  ty:-0.05 },
+  sleeveR:{ th:0.62,    phi:0.47, r:4.3, tx:-0.28, ty:-0.05 },
+  cuffL:  { th:-0.74,   phi:0.48, r:3.3, tx:0.46,  ty:0.05  },
+  cuffR:  { th:0.74,    phi:0.48, r:3.3, tx:-0.46, ty:0.05  },
+  collar: { th:0,       phi:0.36, r:3.5, tx:0,     ty:1.05  },
+  placket:{ th:0,       phi:0.46, r:4.0, tx:0,     ty:0.72  }
+};
+function faceArea(key){
+  const f = FACE[key];
+  if (!f) return;
+  const cur = cam.gTheta;
+  cam.gTheta = cur + ((((f.th - cur) % (Math.PI*2)) + Math.PI*3) % (Math.PI*2)) - Math.PI;
+  cam.gPhi = Math.PI * f.phi;
+  cam.gRadius = f.r; cam.gtx = f.tx; cam.gty = f.ty;
+  intro = 0; needsRender = true;
+}
+function setView(v){
+  intro = 0;
+  const snap = t => { const cur = cam.gTheta;
+    return cur + ((((t - cur) % (Math.PI*2)) + Math.PI*3) % (Math.PI*2)) - Math.PI; };
+  if (v === 'front') cam.gTheta = snap(0);
+  if (v === 'back') cam.gTheta = snap(Math.PI);
+  if (v === 'left') cam.gTheta = snap(-Math.PI/2);
+  if (v === 'right') cam.gTheta = snap(Math.PI/2);
+  if (v === 'fit'){ cam.gTheta = snap(0); cam.gRadius = 5.9; cam.gtx = 0; cam.gty = 0; }
+  if (v !== 'fit') cam.gPhi = Math.PI*0.5;
+  needsRender = true;
+}
+
+function loop(){
+  requestAnimationFrame(loop);
+  if (state.view.spin){ cam.gTheta += 0.0055; needsRender = true; }
+  const k = intro ? 0.045 : 0.16;
+  const before = cam.theta + cam.phi + cam.radius + cam.tx + cam.ty;
+  cam.theta = lerp(cam.theta, cam.gTheta, k);
+  cam.phi = lerp(cam.phi, cam.gPhi, k);
+  cam.radius = lerp(cam.radius, cam.gRadius, k);
+  cam.tx = lerp(cam.tx, cam.gtx, 0.16);
+  cam.ty = lerp(cam.ty, cam.gty, 0.16);
+  if (Math.abs(before - (cam.theta + cam.phi + cam.radius + cam.tx + cam.ty)) > 1e-5) needsRender = true;
+  if (intro && Math.abs(cam.theta - cam.gTheta) < 0.004) intro = 0;
+
+  if (needsRender){
+    const sp = Math.sin(cam.phi), cp = Math.cos(cam.phi);
+    camera.position.set(
+      cam.tx + cam.radius * sp * Math.sin(cam.theta),
+      cam.ty + cam.radius * cp,
+      cam.radius * sp * Math.cos(cam.theta)
+    );
+    camera.lookAt(cam.tx, cam.ty, 0);
+    renderer.render(scene, camera);
+    needsRender = false;
+  }
+}
+
+/* ------------------------------------------- 7. the flat pattern editor */
+const ed = { c:null, x:null, w:0, h:0, s:1, ox:0, oy:0, ready:false,
+             drag:null, hover:null, snapX:false, snapY:false };
+const HANDLE = 9;
+
+const toDisp  = p => ({ x: ed.ox + p.x * ed.s, y: ed.oy + p.y * ed.s });
+const toAtlas = (x, y) => ({ x: (x - ed.ox) / ed.s, y: (y - ed.oy) / ed.s });
+const layerBase = l => l.type === 'image' ? l.scale : l.size;
+function setBase(l, v){
+  if (l.type === 'image') l.scale = clamp(v, 0.002, 12);
+  else l.size = clamp(Math.round(v), 6, 1400);
+}
+
+function sizeEditor(){
+  const frame = $('.editframe');
+  if (!frame || !ed.c) return;
+  const r = frame.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  ed.w = Math.max(60, Math.round(r.width));
+  ed.h = Math.max(60, Math.round(r.height));
+  ed.c.width  = Math.round(ed.w * dpr);
+  ed.c.height = Math.round(ed.h * dpr);
+  ed.c.style.width  = ed.w + 'px';
+  ed.c.style.height = ed.h + 'px';
+  ed.x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (!ed.ready){ ed.ready = true; focusPanel(state.focus); }
+}
+
+function focusPanel(k){
+  const P = PANELS[k];
+  if (!P || !ed.w) return;
+  const pad = 30;
+  ed.s = Math.min((ed.w - pad*2) / P.w, (ed.h - pad*2) / P.h);
+  ed.ox = ed.w/2 - (P.x + P.w/2) * ed.s;
+  ed.oy = ed.h/2 - (P.y + P.h/2) * ed.s;
+  renderEditor();
+}
+function fitAll(){
+  if (!ed.w) return;
+  const used = PKEYS.reduce((b, k) => {
+    const P = PANELS[k];
+    return { x0:Math.min(b.x0,P.x), y0:Math.min(b.y0,P.y),
+             x1:Math.max(b.x1,P.x+P.w), y1:Math.max(b.y1,P.y+P.h) };
+  }, { x0:1e9, y0:1e9, x1:-1e9, y1:-1e9 });
+  const w = used.x1 - used.x0, h = used.y1 - used.y0;
+  ed.s = Math.min((ed.w - 26) / w, (ed.h - 26) / h);
+  ed.ox = ed.w/2 - (used.x0 + w/2) * ed.s;
+  ed.oy = ed.h/2 - (used.y0 + h/2) * ed.s;
+  renderEditor();
+}
+function zoomAt(cx, cy, f){
+  const a = toAtlas(cx, cy);
+  const lo = Math.min(ed.w, ed.h) / (ATLAS * 1.25);
+  ed.s = clamp(ed.s * f, lo, 4);
+  ed.ox = cx - a.x * ed.s;
+  ed.oy = cy - a.y * ed.s;
+  renderEditor();
+}
+
+function corners(l){
+  const sz = layerSize(l), hw = sz.w/2, hh = sz.h/2;
+  const c = Math.cos(l.rot), s = Math.sin(l.rot);
+  const R = (dx, dy) => ({ x: l.x + dx*c - dy*s, y: l.y + dx*s + dy*c });
+  return { tl:R(-hw,-hh), tr:R(hw,-hh), br:R(hw,hh), bl:R(-hw,hh), rt:R(0, -hh - 26/ed.s) };
+}
+
+function renderEditor(){
+  if (!ed.x || !ed.w) return;
+  const x = ed.x;
+  x.clearRect(0, 0, ed.w, ed.h);
+  x.fillStyle = '#0B0D11'; x.fillRect(0, 0, ed.w, ed.h);
+
+  PKEYS.forEach(k => {
+    const P = PANELS[k], d = toDisp(P), w = P.w*ed.s, h = P.h*ed.s;
+    if (w < 1 || h < 1 || d.x > ed.w || d.y > ed.h || d.x + w < 0 || d.y + h < 0) return;
+    x.save();
+    x.shadowColor = 'rgba(0,0,0,.6)'; x.shadowBlur = 13; x.shadowOffsetY = 3;
+    x.fillStyle = '#000'; x.fillRect(d.x, d.y, w, h);
+    x.restore();
+    x.drawImage(atlasCv, P.x, P.y, P.w, P.h, d.x, d.y, w, h);
+    if (state.view.showArea){
+      const on = k === state.focus;
+      x.strokeStyle = on ? 'rgba(232,180,87,.9)' : 'rgba(255,255,255,.2)';
+      x.setLineDash(on ? [] : [5, 4]);
+      x.lineWidth = on ? 1.6 : 1;
+      x.strokeRect(d.x + .5, d.y + .5, w - 1, h - 1);
+      x.setLineDash([]);
+      if (w > 46 && d.y > 12){
+        x.font = '600 10px ui-sans-serif, system-ui, sans-serif';
+        x.fillStyle = on ? 'rgba(232,180,87,.95)' : 'rgba(242,241,236,.5)';
+        x.fillText(P.label, d.x + 2, d.y - 5);
+      }
+    }
+  });
+
+  const l = selLayer();
+  if (l && l.visible){
+    const C = corners(l);
+    const q = ['tl','tr','br','bl'].map(k => toDisp(C[k]));
+    const r = toDisp(C.rt);
+    x.save();
+    x.strokeStyle = 'rgba(232,180,87,.95)'; x.lineWidth = 1.4;
+    x.beginPath(); x.moveTo(q[0].x, q[0].y);
+    for (let i = 1; i < 4; i++) x.lineTo(q[i].x, q[i].y);
+    x.closePath(); x.stroke();
+    x.beginPath();
+    x.moveTo((q[0].x + q[1].x)/2, (q[0].y + q[1].y)/2); x.lineTo(r.x, r.y); x.stroke();
+    if (!l.locked){
+      q.forEach(o => {
+        x.fillStyle = '#0D1016'; x.strokeStyle = '#E8B457'; x.lineWidth = 1.4;
+        x.beginPath(); x.rect(o.x - HANDLE/2, o.y - HANDLE/2, HANDLE, HANDLE);
+        x.fill(); x.stroke();
+      });
+      x.fillStyle = '#E8B457';
+      x.beginPath(); x.arc(r.x, r.y, HANDLE/2 + 1, 0, Math.PI*2); x.fill();
+    }
+    x.restore();
+
+    if (ed.snapX || ed.snapY){
+      const P = PANELS[panelOf(l)];
+      x.save();
+      x.strokeStyle = 'rgba(126,178,255,.8)'; x.setLineDash([4, 4]); x.lineWidth = 1;
+      if (ed.snapX){
+        const cx = toDisp({ x:P.x + P.w/2, y:0 }).x;
+        x.beginPath(); x.moveTo(cx, 0); x.lineTo(cx, ed.h); x.stroke();
+      }
+      if (ed.snapY){
+        const cy = toDisp({ x:0, y:P.y + P.h/2 }).y;
+        x.beginPath(); x.moveTo(0, cy); x.lineTo(ed.w, cy); x.stroke();
+      }
+      x.restore();
+    }
+  }
+}
+
+function hitHandle(l, a){
+  if (!l || l.locked || !l.visible) return null;
+  const C = corners(l), m = toDisp(a), lim = HANDLE + 6;
+  const near = k => { const t = toDisp(C[k]); return Math.hypot(t.x - m.x, t.y - m.y) < lim; };
+  if (near('rt')) return 'rot';
+  for (const k of ['tl','tr','br','bl']) if (near(k)) return k;
+  return null;
+}
+function inLayer(l, a){
+  const sz = layerSize(l), c = Math.cos(-l.rot), s = Math.sin(-l.rot);
+  const dx = a.x - l.x, dy = a.y - l.y;
+  const lx = dx*c - dy*s, ly = dx*s + dy*c;
+  const pad = 4 / Math.max(ed.s, 0.02);
+  return Math.abs(lx) <= sz.w/2 + pad && Math.abs(ly) <= sz.h/2 + pad;
+}
+function hitLayer(a){
+  for (let i = state.layers.length - 1; i >= 0; i--){
+    const l = state.layers[i];
+    if (l.visible && !l.locked && inLayer(l, a)) return l;
+  }
+  return null;
+}
+
+function bindEditor(){
+  const c = ed.c;
+  c.style.touchAction = 'none';
+  let px = 0, py = 0;
+
+  const local = e => {
+    const r = c.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  };
+
+  c.addEventListener('pointerdown', e => {
+    c.setPointerCapture(e.pointerId);
+    const m = local(e), a = toAtlas(m.x, m.y);
+    px = m.x; py = m.y;
+
+    if (e.button === 1 || e.button === 2 || e.shiftKey){ ed.drag = { mode:'pan' }; return; }
+
+    const sel = selLayer();
+    const h = hitHandle(sel, a);
+    if (h){
+      ed.drag = { mode:h, id:sel.id, base:layerBase(sel), rot0:sel.rot,
+                  d0:Math.max(Math.hypot(a.x - sel.x, a.y - sel.y), 1e-3),
+                  a0:Math.atan2(a.y - sel.y, a.x - sel.x) };
+      return;
+    }
+    const l = hitLayer(a);
+    if (l){
+      if (state.sel !== l.id){ state.sel = l.id; renderLayers(); renderProps(); }
+      ed.drag = { mode:'move', id:l.id, lx:l.x, ly:l.y, ax:a.x, ay:a.y };
+      renderEditor();
+      return;
+    }
+    const k = panelAt(a.x, a.y);
+    if (k && k !== state.focus){ state.focus = k; syncTabs(); if (state.view.followArea) faceArea(k); }
+    if (state.sel){ state.sel = null; renderLayers(); renderProps(); }
+    ed.drag = { mode:'pan' };
+    renderEditor();
+  });
+
+  c.addEventListener('pointermove', e => {
+    const m = local(e), a = toAtlas(m.x, m.y);
+    if (!ed.drag){
+      const sel = selLayer();
+      c.style.cursor = hitHandle(sel, a) ? 'crosshair' : (hitLayer(a) ? 'move' : 'grab');
+      return;
+    }
+    const d = ed.drag;
+    if (d.mode === 'pan'){
+      ed.ox += m.x - px; ed.oy += m.y - py; px = m.x; py = m.y;
+      renderEditor(); return;
+    }
+    const l = findLayer(d.id);
+    if (!l) return;
+
+    if (d.mode === 'move'){
+      l.x = d.lx + (a.x - d.ax);
+      l.y = d.ly + (a.y - d.ay);
+      const home = panelAt(l.x, l.y);
+      if (home) l.panel = home;
+      const P = PANELS[l.panel] || PANELS.front;
+      const tol = 9 / Math.max(ed.s, 0.02);
+      ed.snapX = Math.abs(l.x - (P.x + P.w/2)) < tol;
+      ed.snapY = Math.abs(l.y - (P.y + P.h/2)) < tol;
+      if (ed.snapX) l.x = P.x + P.w/2;
+      if (ed.snapY) l.y = P.y + P.h/2;
+      clampToCloth(l);
+    } else if (d.mode === 'rot'){
+      let r = d.rot0 + (Math.atan2(a.y - l.y, a.x - l.x) - d.a0);
+      if (e.shiftKey) r = Math.round(r / (15*DEG)) * (15*DEG);
+      l.rot = r;
+    } else {
+      const f = Math.hypot(a.x - l.x, a.y - l.y) / d.d0;
+      setBase(l, d.base * clamp(f, 0.04, 30));
+    }
+    afterEdit(false);
+  });
+
+  const stop = () => {
+    if (ed.drag && ed.drag.mode !== 'pan'){ ed.snapX = ed.snapY = false; push(); }
+    ed.drag = null;
+    renderEditor();
+  };
+  c.addEventListener('pointerup', stop);
+  c.addEventListener('pointercancel', stop);
+  c.addEventListener('contextmenu', e => e.preventDefault());
+  c.addEventListener('dblclick', e => {
+    const m = local(e), l = hitLayer(toAtlas(m.x, m.y));
+    if (l && l.type === 'text'){
+      state.sel = l.id; renderLayers(); renderProps();
+      const t = $('#pText'); if (t){ t.focus(); t.select(); }
+    }
+  });
+  c.addEventListener('wheel', e => {
+    e.preventDefault();
+    const m = local(e);
+    zoomAt(m.x, m.y, Math.exp(-e.deltaY * 0.0014));
+  }, { passive:false });
+
+  c.addEventListener('dragover', e => { e.preventDefault(); c.classList.add('drop'); });
+  c.addEventListener('dragleave', () => c.classList.remove('drop'));
+  c.addEventListener('drop', e => {
+    e.preventDefault(); c.classList.remove('drop');
+    const m = local(e), a = toAtlas(m.x, m.y), k = panelAt(a.x, a.y);
+    if (k) state.focus = k;
+    if (e.dataTransfer && e.dataTransfer.files.length) addImages(e.dataTransfer.files, a);
+  });
+}
+
+/* ------------------------------------------------------------- 8. the UI */
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function push(){
+  if (quiet) return;
+  const snap = JSON.stringify({ shirt: state.shirt, layers: state.layers });
+  if (hIndex >= 0 && history[hIndex] === snap) return;
+  history = history.slice(0, hIndex + 1);
+  history.push(snap);
+  if (history.length > 60) history.shift();
+  hIndex = history.length - 1;
+  syncUndo(); saveLocal();
+}
+function syncUndo(){
+  $('#btnUndo').disabled = hIndex <= 0;
+  $('#btnRedo').disabled = hIndex >= history.length - 1;
+}
+function restore(i){
+  if (i < 0 || i >= history.length) return;
+  hIndex = i;
+  const d = JSON.parse(history[i]);
+  state.shirt = d.shirt; state.layers = d.layers;
+  if (!findLayer(state.sel)) state.sel = null;
+  quiet = true;
+  syncShirtInputs(); applyShirt(); renderAll(); renderEditor(); renderLayers(); renderProps(); syncTabs();
+  quiet = false;
+  syncUndo(); saveLocal();
+}
+
+function saveLocal(){
+  try { localStorage.setItem('pique.v2', JSON.stringify(serialize())); } catch(e){}
+}
+function serialize(){
+  const used = {};
+  state.layers.forEach(l => {
+    if (l.asset && assets[l.asset])
+      used[l.asset] = { src:assets[l.asset].src, w:assets[l.asset].w, h:assets[l.asset].h };
+  });
+  return { v:2, atlas:ATLAS, shirt:state.shirt, view:state.view,
+           layers:state.layers, focus:state.focus, assets:used };
+}
+function loadAsset(id, rec){
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => { assets[id] = { src:rec.src, img, w:rec.w || img.naturalWidth, h:rec.h || img.naturalHeight, cache:{} }; res(); };
+    img.onerror = () => res();
+    img.src = rec.src;
+  });
+}
+/* older saves stored one canvas per print box — drop them onto the new pieces */
+function migrateV1(d){
+  const map = { front:'front', back:'back', sleeveL:'sleeveL', sleeveR:'sleeveR' };
+  const out = [];
+  Object.keys(map).forEach(k => {
+    const src = d.areas[k];
+    if (!src || !src.layers) return;
+    const P = PANELS[map[k]];
+    const cw = k.indexOf('sleeve') === 0 ? 520 : 900;
+    const ch = k.indexOf('sleeve') === 0 ? 520 : 1200;
+    const f = Math.min(P.w / cw, P.h / ch) * 0.82;
+    src.layers.forEach(l => {
+      l.panel = map[k];
+      l.x = P.x + P.w/2 + (l.x - cw/2) * f;
+      l.y = P.y + P.h/2 + (l.y - ch/2) * f;
+      if (l.type === 'image') l.scale = (l.scale || 1) * f;
+      else l.size = Math.max(6, Math.round((l.size || 100) * f));
+      if (l.sw) l.sw = l.sw * f;
+      out.push(l);
+    });
+  });
+  return out;
+}
+async function deserialize(d){
+  if (!d || (!d.layers && !d.areas)) return false;
+  if (d.assets) await Promise.all(Object.keys(d.assets).map(id => loadAsset(id, d.assets[id])));
+  state.shirt = Object.assign(state.shirt, d.shirt || {});
+  state.view = Object.assign(state.view, d.view || {});
+  state.layers = d.layers ? d.layers : migrateV1(d);
+  state.layers.forEach(l => { if (!PANELS[l.panel]) homeLayer(l); clampToCloth(l); });
+  state.focus = PANELS[d.focus] ? d.focus : 'front';
+  state.sel = null;
+  return true;
+}
+
+/* ----- garment panel --------------------------------------------------- */
+function syncShirtInputs(){
+  const S = state.shirt;
+  $('#cBody').value = S.body; $('#cBodyHex').value = S.body;
+  $('#cSleeve').value = S.matchSleeve ? S.body : S.sleeve;
+  $('#cTrim').value = S.matchTrim ? S.body : S.trim;
+  $('#cPlacket').value = S.matchPlacket ? S.body : S.placket;
+  $('#cButton').value = S.button;
+  $('#mSleeve').checked = S.matchSleeve; $('#mTrim').checked = S.matchTrim; $('#mPlacket').checked = S.matchPlacket;
+  $('#cSleeve').disabled = S.matchSleeve; $('#cTrim').disabled = S.matchTrim; $('#cPlacket').disabled = S.matchPlacket;
+  $('#fabric').value = S.fabric;
+  $('#fabDepth').value = S.fabDepth; $('#fabDepthV').textContent = S.fabDepth;
+  $('#backdrop').value = state.view.backdrop;
+  $('#showArea').checked = state.view.showArea;
+  $('#followArea').checked = state.view.followArea;
+  $('#showShadow').checked = state.view.showShadow;
+  $$('#swatches .sw').forEach(b => b.classList.toggle('on', b.dataset.hex.toLowerCase() === S.body.toLowerCase()));
+}
+
+function buildSwatches(){
+  const box = $('#swatches');
+  box.innerHTML = '';
+  GARMENT_SWATCHES.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'sw'; b.style.background = s[0]; b.dataset.hex = s[0];
+    b.title = s[1]; b.setAttribute('aria-label', s[1]);
+    b.onclick = () => {
+      state.shirt.body = s[0];
+      syncShirtInputs(); applyShirt(); renderEditor(); push();
+    };
+    box.appendChild(b);
+  });
+}
+
+/* ----- pattern-piece navigation ---------------------------------------- */
+function buildTabs(){
+  const nav = $('#areaTabs');
+  nav.innerHTML = '';
+  PKEYS.forEach(k => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('role', 'tab'); b.dataset.k = k;
+    b.innerHTML = '<span class="pip"></span>' + PANELS[k].label;
+    b.onclick = () => setArea(k);
+    nav.appendChild(b);
+  });
+  const all = document.createElement('button');
+  all.type = 'button'; all.textContent = 'Whole pattern';
+  all.onclick = () => { state.focus = 'front'; syncTabs(); fitAll(); };
+  nav.appendChild(all);
+}
+function countOn(k){
+  let n = 0;
+  state.layers.forEach(l => { if (panelOf(l) === k) n++; });
+  return n;
+}
+function syncTabs(){
+  $$('#areaTabs button[data-k]').forEach(b => {
+    const k = b.dataset.k;
+    b.setAttribute('aria-selected', k === state.focus ? 'true' : 'false');
+    b.dataset.used = countOn(k) ? '1' : '0';
+  });
+  const P = PANELS[state.focus];
+  if (!P) return;
+  $('#edTitle').textContent = P.label;
+  const n = countOn(state.focus);
+  $('#edSize').textContent = Math.round(inches(P.w)) + ' × ' + Math.round(inches(P.h)) + ' in';
+  $('#edTip').textContent = n
+    ? n + (n === 1 ? ' design here' : ' designs here') + ' · drag on the flat piece or straight on the shirt'
+    : 'Drop artwork anywhere on the cloth — scroll to zoom, shift-drag to pan';
+}
+function setArea(k){
+  if (!PANELS[k]) return;
+  state.focus = k;
+  syncTabs(); focusPanel(k); renderLayers();
+  if (state.view.followArea) faceArea(k);
+}
+
+/* ----- layer list ------------------------------------------------------ */
+function layerName(l){
+  if (l.name) return l.name;
+  if (l.type === 'text') return (String(l.text || '').split('\n')[0] || 'Text').slice(0, 26) || 'Text';
+  if (l.type === 'art') return (ART_MAP[l.art] || {}).label || 'Artwork';
+  return 'Image';
+}
+function thumbFor(l, px){
+  const c = document.createElement('canvas');
+  c.width = c.height = px;
+  const x = c.getContext('2d');
+  const s = layerSize(l);
+  const k = Math.min(px / Math.max(s.w, 1), px / Math.max(s.h, 1)) * 0.84;
+  x.translate(px/2, px/2); x.scale(k, k);
+  try {
+    if (l.type === 'text') drawTextLayer(x, l);
+    else if (l.type === 'art') drawArt(x, l.art, l.size, l);
+    else drawImageLayer(x, l);
+  } catch(e){}
+  return c;
+}
+const ICON = {
+  eye:'<svg class="ic" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>',
+  eyeOff:'<svg class="ic" viewBox="0 0 24 24"><path d="M3 3l18 18"/><path d="M10.6 5.2A9.9 9.9 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 3.9M6.3 6.4A17 17 0 0 0 2 12s4 7 10 7a9.6 9.6 0 0 0 4.2-.9"/></svg>',
+  lock:'<svg class="ic" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+  unlock:'<svg class="ic" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 7.5-2"/></svg>',
+  up:'<svg class="ic" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>',
+  down:'<svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12l7 7 7-7"/></svg>',
+  copy:'<svg class="ic" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
+  trash:'<svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 14h10l1-14"/></svg>'
+};
+
+function renderLayers(){
+  const box = $('#layerList');
+  const ls = state.layers;
+  $('#layerCount').textContent = ls.length;
+  box.innerHTML = '';
+  if (!ls.length){
+    box.innerHTML = '<div class="empty"><b>Nothing on the shirt yet.</b>' +
+      'Add text, drop in a logo, or pick a piece of artwork above.</div>';
+    syncTabs();
+    return;
+  }
+  ls.slice().reverse().forEach(l => {
+    const row = document.createElement('div');
+    row.className = 'layer' + (l.id === state.sel ? ' on' : '') + (l.visible ? '' : ' hid');
+    const th = document.createElement('div'); th.className = 'th';
+    th.appendChild(thumbFor(l, 26));
+    const nm = document.createElement('div'); nm.className = 'nm';
+    const on = PANELS[panelOf(l)];
+    nm.innerHTML = '<b>' + escapeHTML(layerName(l)) + '</b><i>' +
+                   escapeHTML(on ? on.label : '—') + '</i>';
+    row.appendChild(th); row.appendChild(nm);
+    const mk = (html, title, fn) => {
+      const b = document.createElement('button');
+      b.className = 'mini'; b.innerHTML = html; b.title = title;
+      b.onclick = e => { e.stopPropagation(); fn(); };
+      row.appendChild(b);
+    };
+    mk(l.visible ? ICON.eye : ICON.eyeOff, l.visible ? 'Hide' : 'Show', () => {
+      l.visible = !l.visible; renderAtlas(); renderEditor(); renderLayers(); push();
+    });
+    mk(l.locked ? ICON.lock : ICON.unlock, l.locked ? 'Unlock' : 'Lock', () => {
+      l.locked = !l.locked; renderLayers(); renderEditor(); push();
+    });
+    mk(ICON.trash, 'Delete', () => removeLayer(l.id));
+    row.onclick = () => {
+      state.sel = l.id;
+      const k = panelOf(l);
+      if (k !== state.focus){ state.focus = k; focusPanel(k); if (state.view.followArea) faceArea(k); }
+      renderLayers(); renderProps(); renderEditor();
+    };
+    box.appendChild(row);
+  });
+  syncTabs();
+}
+
+function addLayer(l){
+  homeLayer(l);
+  state.layers.push(l);
+  state.sel = l.id;
+  renderAtlas(); renderEditor(); renderLayers(); renderProps(); push();
+  needsRender = true;
+}
+function removeLayer(id){
+  const i = state.layers.findIndex(l => l.id === id);
+  if (i >= 0) state.layers.splice(i, 1);
+  if (state.sel === id) state.sel = null;
+  renderAll(); renderEditor(); renderLayers(); renderProps(); push();
+}
+function moveLayer(id, dir){
+  const ls = state.layers, i = ls.findIndex(l => l.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= ls.length) return;
+  ls.splice(j, 0, ls.splice(i, 1)[0]);
+  renderAtlas(); renderEditor(); renderLayers(); push();
+}
+function duplicateLayer(id){
+  const l = findLayer(id);
+  if (!l) return;
+  const c = JSON.parse(JSON.stringify(l));
+  c.id = uid(); c.x += 26; c.y += 26;
+  addLayer(c);
+}
+
+/* ----- adding things --------------------------------------------------- */
+function addText(){
+  const l = newLayer('text');
+  if (/sleeve|cuff|collar|placket/.test(state.focus)) l.text = 'TEAM';
+  addLayer(l);
+  setTimeout(() => { const t = $('#pText'); if (t){ t.focus(); t.select(); } }, 40);
+}
+function addArt(key){
+  const l = newLayer('art');
+  l.art = key;
+  l.color = pickInk();
+  addLayer(l);
+}
+function pickInk(){
+  const c = new THREE.Color(state.shirt.body);
+  const hsl = { h:0, s:0, l:0 }; c.getHSL(hsl);
+  return hsl.l > 0.55 ? '#1B2233' : '#F2F1EC';
+}
+function addImages(files, at){
+  const list = Array.from(files).filter(f => /^image\//.test(f.type));
+  if (!list.length) return;
+  let done = 0;
+  list.forEach(file => {
+    const fr = new FileReader();
+    fr.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const id = uid();
+        assets[id] = { src:fr.result, img, w:img.naturalWidth, h:img.naturalHeight, cache:{} };
+        const P = PANELS[state.focus] || PANELS.front;
+        const l = newLayer('image');
+        l.asset = id;
+        l.scale = Math.min(P.w*0.6/img.naturalWidth, P.h*0.45/img.naturalHeight);
+        if (at){ l.x = at.x; l.y = at.y; }
+        homeLayer(l); clampToCloth(l);
+        state.layers.push(l);
+        state.sel = l.id;
+        if (++done === list.length){
+          renderAtlas(); renderEditor(); renderLayers(); renderProps(); push();
+          toast(list.length + (list.length === 1 ? ' image added' : ' images added'));
+        }
+      };
+      img.onerror = () => { if (++done === list.length){ renderLayers(); } toast('That file could not be read as an image'); };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+
+/* ----- artwork picker -------------------------------------------------- */
+let artReplaceId = null;
+function buildArtPicker(){
+  const sel = $('#artCat');
+  sel.innerHTML = '<option value="*">All artwork</option>' +
+    ART_CATS.map(c => '<option value="' + c + '">' + c + '</option>').join('');
+  sel.onchange = fillArtGrid;
+  fillArtGrid();
+}
+function fillArtGrid(){
+  const cat = $('#artCat').value, grid = $('#artGrid');
+  grid.innerHTML = '';
+  ART_DEFS.forEach(d => {
+    if (cat !== '*' && d[2] !== cat) return;
+    const b = document.createElement('button');
+    b.title = d[1];
+    const c = document.createElement('canvas');
+    c.width = c.height = 64;
+    const x = c.getContext('2d');
+    x.translate(32, 32);
+    drawArt(x, d[0], 56, { color:'#DCE0F0', color2:'#E8B457', outline:false, strokeWidth:5 });
+    b.appendChild(c);
+    b.onclick = () => {
+      if (artReplaceId){
+        const l = findLayer(artReplaceId);
+        if (l){ l.art = d[0]; renderAtlas(); renderEditor(); renderLayers(); renderProps(); push(); }
+        artReplaceId = null;
+        $('#artPanel').style.display = 'none';
+      } else addArt(d[0]);
+    };
+    grid.appendChild(b);
+  });
+}
+
+/* ----- properties ------------------------------------------------------ */
+function rowHTML(label, inner){
+  return '<div class="row"><span class="lbl">' + label + '</span>' + inner + '</div>';
+}
+function rangeHTML(k, min, max, step, val, suffix){
+  return '<input type="range" class="grow" data-k="' + k + '" data-t="n" min="' + min + '" max="' + max +
+    '" step="' + step + '" value="' + val + '"><span class="num" data-out="' + k + '">' +
+    fmtNum(val) + (suffix || '') + '</span>';
+}
+function fmtNum(v){ return (Math.abs(v) < 10 && v % 1 !== 0) ? (Math.round(v*100)/100) : Math.round(v); }
+
+function renderProps(){
+  const box = $('#props'), l = selLayer();
+  if (!l){
+    box.innerHTML = '<div class="prophead"><b>Nothing selected</b></div>' +
+      '<div class="empty">Pick a layer above, or tap a design on the shirt to edit it.</div>';
+    return;
+  }
+  let h = '<div class="prophead"><b>' + escapeHTML(layerName(l)) + '</b>' +
+    '<span class="pill">' + (l.type === 'art' ? 'artwork' : l.type) + '</span></div>';
+
+  if (l.type === 'text'){
+    h += '<div class="row"><textarea data-k="text" data-t="s" id="pText" spellcheck="false">' +
+         escapeHTML(l.text) + '</textarea></div>';
+    h += '<div class="fontgrid" id="pFonts">' + FONTS.map(f =>
+      '<button data-font="' + f.n + '" class="' + (f.n === l.font ? 'on' : '') +
+      '" style="font-family:\'' + f.n + '\',sans-serif" title="' + f.t + '">' + f.n + '</button>').join('') + '</div>';
+    const fdef = FONT_BY_NAME[l.font] || FONTS[0];
+    if (fdef.w.length > 1){
+      h += rowHTML('Weight', '<select class="grow" data-k="weight" data-t="n">' +
+        fdef.w.map(w => '<option value="' + w + '"' + (w === l.weight ? ' selected' : '') + '>' +
+        ({400:'Regular',500:'Medium',600:'Semibold',700:'Bold',900:'Black'}[w] || w) + '</option>').join('') + '</select>');
+    }
+    h += rowHTML('Size', rangeHTML('size', 10, Math.round(PANELS[panelOf(l)].w*1.1), 1, l.size));
+    h += rowHTML('Tracking', rangeHTML('ls', -30, 90, 1, l.ls));
+    h += rowHTML('Leading', rangeHTML('lh', 0.7, 2.2, 0.01, l.lh));
+    h += rowHTML('Arc', rangeHTML('curve', -100, 100, 1, l.curve));
+    h += rowHTML('Align', '<div class="seg grow" id="pAlign">' +
+      ['left','center','right'].map(a => '<button data-align="' + a + '" class="' + (l.align === a ? 'on' : '') + '">' +
+       (a === 'left' ? 'Left' : a === 'center' ? 'Centre' : 'Right') + '</button>').join('') + '</div>');
+    h += rowHTML('Fill', '<input type="color" data-k="color" data-t="s" value="' + l.color + '">' +
+      '<label class="chk grow"><input type="checkbox" data-k="outline" data-t="b"' + (l.outline ? ' checked' : '') + '>Outline only</label>');
+    h += rowHTML('Outline', '<input type="color" data-k="sc" data-t="s" value="' + l.sc + '">' +
+      rangeHTML('sw', 0, 40, 1, l.sw));
+    h += '<div class="row"><span class="lbl">Shadow</span><label class="chk grow">' +
+      '<input type="checkbox" data-k="shadow" data-t="b"' + (l.shadow ? ' checked' : '') + '>Drop shadow behind the type</label></div>';
+  }
+
+  if (l.type === 'art'){
+    h += '<div class="row"><button class="btn ghost grow" id="pChangeArt">Choose different artwork</button></div>';
+    h += rowHTML('Size', rangeHTML('size', 12, Math.round(PANELS[panelOf(l)].w*1.6), 1, l.size));
+    h += rowHTML('Colour', '<input type="color" data-k="color" data-t="s" value="' + l.color + '">' +
+      '<input type="color" data-k="color2" data-t="s" value="' + l.color2 + '"><span class="grow" style="color:var(--chalk-3);font-size:11.5px">main · detail</span>');
+    h += rowHTML('Line', '<label class="chk" style="flex:0 0 auto"><input type="checkbox" data-k="outline" data-t="b"' +
+      (l.outline ? ' checked' : '') + '>Outline</label>' + rangeHTML('strokeWidth', 1, 20, 0.5, l.strokeWidth));
+  }
+
+  if (l.type === 'image'){
+    const a = assets[l.asset];
+    h += '<div class="row"><button class="btn ghost grow" id="pReplace">Replace image</button>' +
+         '<button class="btn ghost" id="pFit">Fit</button></div>';
+    if (a) h += '<div class="row"><span class="lbl">Source</span><span class="grow" style="color:var(--chalk-3);font-size:11.5px">' +
+      a.w + ' × ' + a.h + ' px</span></div>';
+    h += rowHTML('Scale', rangeHTML('scale', 0.005, 5, 0.005, l.scale));
+    h += rowHTML('Treatment', '<select class="grow" data-k="filter" data-t="s">' +
+      [['none','Full colour'],['gray','Greyscale'],['mono','One colour'],['sepia','Sepia'],['invert','Inverted']]
+      .map(o => '<option value="' + o[0] + '"' + (l.filter === o[0] ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>');
+    h += rowHTML('Contrast', rangeHTML('contrast', 20, 300, 1, l.contrast, '%'));
+    h += rowHTML('Brightness', rangeHTML('bright', 20, 220, 1, l.bright, '%'));
+    h += '<div class="row"><span class="lbl">Background</span><label class="chk grow">' +
+      '<input type="checkbox" data-k="keyWhite" data-t="b"' + (l.keyWhite ? ' checked' : '') + '>Knock out the white</label></div>';
+    if (l.keyWhite) h += rowHTML('Tolerance', rangeHTML('tol', 1, 60, 1, l.tol));
+  }
+
+  h += '<div class="stitch" style="margin:13px 0 11px"></div>';
+  h += rowHTML('Rotation', rangeHTML('rotDeg', -180, 180, 1, Math.round(l.rot/DEG), '°'));
+  h += rowHTML('Opacity', rangeHTML('opacity', 0.05, 1, 0.01, l.opacity));
+  h += '<div class="row"><span class="lbl">Flip</span><div class="seg grow">' +
+    '<button id="pFlipX" class="' + (l.flipX ? 'on' : '') + '">Horizontal</button>' +
+    '<button id="pFlipY" class="' + (l.flipY ? 'on' : '') + '">Vertical</button></div></div>';
+  h += '<div class="row"><span class="lbl">Position</span><div class="seg grow">' +
+    '<button id="pCenH">Centre across</button><button id="pCenV">Centre down</button></div></div>';
+  h += '<div class="grid2" style="margin-top:11px">' +
+    '<button class="btn ghost" id="pBack">Send back</button>' +
+    '<button class="btn ghost" id="pFwd">Bring forward</button></div>';
+  h += '<div class="grid2" style="margin-top:7px">' +
+    '<button class="btn ghost" id="pDup">Duplicate</button>' +
+    '<button class="btn ghost danger" id="pDel">Delete layer</button></div>';
+
+  box.innerHTML = h;
+  bindProps(l);
+}
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function afterEdit(hist){
+  renderAtlas(); renderEditor();
+  needsRender = true;
+  if (hist){ renderLayers(); push(); }
+}
+function syncPropNums(){
+  const l = selLayer();
+  if (!l) return;
+  $$('#props [data-out]').forEach(o => {
+    const k = o.dataset.out;
+    const v = k === 'rotDeg' ? Math.round(l.rot/DEG) : l[k];
+    if (v !== undefined){
+      const inp = $('#props [data-k="' + k + '"]');
+      if (inp) inp.value = v;
+      o.textContent = fmtNum(v) + (o.textContent.indexOf('%') > 0 ? '%' : o.textContent.indexOf('°') > 0 ? '°' : '');
+    }
+  });
+}
+
+function bindProps(l){
+  const box = $('#props');
+  $$('[data-k]', box).forEach(el => {
+    const k = el.dataset.k, t = el.dataset.t;
+    const read = () => t === 'b' ? el.checked : t === 'n' ? parseFloat(el.value) : el.value;
+    const apply = hist => {
+      const v = read();
+      if (k === 'rotDeg') l.rot = v * DEG; else l[k] = v;
+      const out = $('[data-out="' + k + '"]', box);
+      if (out) out.textContent = fmtNum(v) + (out.textContent.indexOf('%') > 0 ? '%' : out.textContent.indexOf('°') > 0 ? '°' : '');
+      if (k === 'keyWhite' || k === 'weight' || k === 'outline') { afterEdit(hist); renderProps(); return; }
+      afterEdit(hist);
+    };
+    el.addEventListener('input', () => apply(false));
+    el.addEventListener('change', () => apply(true));
+  });
+  $$('#pFonts button', box).forEach(b => b.onclick = () => {
+    l.font = b.dataset.font;
+    const def = FONT_BY_NAME[l.font];
+    if (def && def.w.indexOf(l.weight) < 0) l.weight = def.w[0];
+    ensureFont(l.font, l.weight).then(() => { afterEdit(true); renderProps(); });
+  });
+  $$('#pAlign button', box).forEach(b => b.onclick = () => {
+    l.align = b.dataset.align;
+    $$('#pAlign button', box).forEach(o => o.classList.toggle('on', o === b));
+    afterEdit(true);
+  });
+  const on = (id, fn) => { const e = $(id, box); if (e) e.onclick = fn; };
+  on('#pChangeArt', () => {
+    artReplaceId = l.id;
+    $('#artPanel').style.display = 'block';
+    $('#secAdd').dataset.open = '1';
+    $('#artGrid').scrollIntoView({ block:'nearest', behavior:'smooth' });
+    toast('Pick a shape to swap it in');
+  });
+  on('#pReplace', () => { pendingReplace = l.id; $('#fileImg').click(); });
+  on('#pFit', () => {
+    const a = assets[l.asset], P = PANELS[panelOf(l)];
+    if (!a || !P) return;
+    l.scale = Math.min(P.w*0.92/a.w, P.h*0.92/a.h);
+    l.x = P.x + P.w/2; l.y = P.y + P.h/2; l.rot = 0;
+    afterEdit(true); renderProps();
+  });
+  on('#pFlipX', () => { l.flipX = !l.flipX; afterEdit(true); renderProps(); });
+  on('#pFlipY', () => { l.flipY = !l.flipY; afterEdit(true); renderProps(); });
+  on('#pCenH', () => { const P = PANELS[panelOf(l)]; l.x = P.x + P.w/2; afterEdit(true); });
+  on('#pCenV', () => { const P = PANELS[panelOf(l)]; l.y = P.y + P.h/2; afterEdit(true); });
+  on('#pBack', () => moveLayer(l.id, -1));
+  on('#pFwd', () => moveLayer(l.id, 1));
+  on('#pDup', () => duplicateLayer(l.id));
+  on('#pDel', () => removeLayer(l.id));
+}
+
+/* ----- fonts ----------------------------------------------------------- */
+const fontLoaded = {};
+function ensureFont(name, weight){
+  const k = name + '|' + (weight || 400);
+  if (fontLoaded[k]) return fontLoaded[k];
+  const p = (document.fonts && document.fonts.load)
+    ? document.fonts.load((weight || 400) + ' 64px "' + name + '"').catch(() => {})
+    : Promise.resolve();
+  fontLoaded[k] = p;
+  return p;
+}
+function preloadFonts(){
+  const jobs = [];
+  FONTS.forEach(f => f.w.forEach(w => jobs.push(ensureFont(f.n, w))));
+  return Promise.all(jobs).then(() => { renderAll(); renderEditor(); renderLayers(); needsRender = true; });
+}
+
+/* ----- files out ------------------------------------------------------- */
+let DL = null, pendingReplace = null;
+(async function(){
+  try { if (window.claude && window.claude.use) DL = await window.claude.use('downloads'); }
+  catch(e){ DL = null; }
+})();
+
+async function saveFile(name, data){
+  if (DL){
+    try { await DL.save({ filename:name, data }); toast('Saved ' + name); return true; }
+    catch(err){
+      if (err && err.code === 'declined') return false;
+      if (err && (err.code === 'rate_limited')) { toast('One save at a time — try again in a moment'); return false; }
+    }
+  }
+  try {
+    const blob = data instanceof Blob ? data : new Blob([data], { type:'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast('Saved ' + name);
+    return true;
+  } catch(e){ toast('Could not save that file here'); return false; }
+}
+
+function shot(){
+  renderer.render(scene, camera);
+  renderer.domElement.toBlob(b => {
+    if (b) saveFile('polo-mockup.png', b); else toast('Could not capture the view');
+  }, 'image/png');
+}
+
+/* Re-render one pattern piece on its own, at print resolution. */
+function printPiece(key, dpi){
+  const P = PANELS[key];
+  const scale = (dpi || 300) / (PPU / 10);
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(P.w * scale));
+  c.height = Math.max(1, Math.round(P.h * scale));
+  const x = c.getContext('2d');
+  x.scale(scale, scale);
+  x.translate(-P.x, -P.y);
+  state.layers.forEach(l => { if (l.visible) stampLayer(x, l); });
+  return c;
+}
+function downloadPrint(){
+  const key = state.focus, P = PANELS[key];
+  if (!countOn(key)){ toast('There is nothing on the ' + P.label.toLowerCase() + ' yet'); return; }
+  printPiece(key, 300).toBlob(b => { if (b) saveFile('print-' + key + '.png', b); }, 'image/png');
+}
+function downloadAtlas(){
+  atlasCv.toBlob(b => { if (b) saveFile('polo-texture.png', b); }, 'image/png');
+}
+function saveDesign(){ saveFile('polo-design.json', JSON.stringify(serialize(), null, 1)); }
+function openDesign(){
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'application/json,.json';
+  inp.onchange = () => {
+    const f = inp.files[0];
+    if (!f) return;
+    const fr = new FileReader();
+    fr.onload = async () => {
+      try {
+        const ok = await deserialize(JSON.parse(fr.result));
+        if (!ok) throw new Error('bad');
+        syncShirtInputs(); applyShirt(); applyBackdrop(); renderAll();
+        sizeEditor(); renderEditor(); renderLayers(); renderProps(); syncTabs(); updateOutlines();
+        history = []; hIndex = -1; push();
+        toast('Design opened');
+      } catch(e){ toast('That file is not a Pique design'); }
+    };
+    fr.readAsText(f);
+  };
+  inp.click();
+}
+
+/* ----- File menu ------------------------------------------------------- */
+function fileMenu(anchor){
+  const old = $('#fmenu');
+  if (old){ old.remove(); return; }
+  const m = document.createElement('div');
+  m.id = 'fmenu';
+  m.style.cssText = 'position:fixed;z-index:60;background:var(--panel-2);border:1px solid var(--line);' +
+    'border-radius:10px;padding:5px;min-width:212px;box-shadow:0 18px 44px rgba(0,0,0,.5)';
+  const items = [
+    ['Download this piece (300dpi PNG)', downloadPrint],
+    ['Download full garment texture', downloadAtlas],
+    ['Download mockup (PNG)', shot],
+    ['—'],
+    ['Save design file', saveDesign],
+    ['Open design file', openDesign],
+    ['—'],
+    ['Clear this piece', () => {
+      const before = state.layers.length;
+      state.layers = state.layers.filter(l => panelOf(l) !== state.focus);
+      if (state.layers.length === before) return toast('Already empty');
+      state.sel = null;
+      renderAtlas(); renderEditor(); renderLayers(); renderProps(); push();
+      toast(PANELS[state.focus].label + ' cleared');
+    }],
+    ['Start over', () => {
+      state.layers = [];
+      state.sel = null;
+      Object.assign(state.shirt, { body:'#1E2A45', sleeve:'#1E2A45', trim:'#1E2A45', placket:'#1E2A45',
+        button:'#E8E4D8', matchSleeve:true, matchTrim:true, matchPlacket:true, fabric:'pique', fabDepth:55 });
+      syncShirtInputs(); applyShirt(); renderAll(); renderEditor(); renderLayers(); renderProps(); push();
+    }]
+  ];
+  items.forEach(it => {
+    if (it[0] === '—'){
+      const d = document.createElement('div');
+      d.className = 'stitch'; d.style.margin = '5px 8px';
+      m.appendChild(d); return;
+    }
+    const b = document.createElement('button');
+    b.textContent = it[0];
+    b.style.cssText = 'display:block;width:100%;text-align:left;padding:8px 10px;border-radius:6px;color:var(--chalk)';
+    b.onmouseenter = () => b.style.background = 'var(--panel-3)';
+    b.onmouseleave = () => b.style.background = 'transparent';
+    b.onclick = () => { m.remove(); it[1](); };
+    m.appendChild(b);
+  });
+  document.body.appendChild(m);
+  const r = anchor.getBoundingClientRect();
+  m.style.top = (r.bottom + 7) + 'px';
+  m.style.left = Math.max(8, Math.min(r.left, window.innerWidth - m.offsetWidth - 10)) + 'px';
+  setTimeout(() => {
+    const close = e => {
+      if (!m.contains(e.target) && e.target !== anchor){ m.remove(); document.removeEventListener('pointerdown', close); }
+    };
+    document.addEventListener('pointerdown', close);
+  }, 0);
+}
+
+/* ----- wiring ---------------------------------------------------------- */
+function wire(){
+  $$('.sec > h3').forEach(h => h.onclick = () => {
+    const s = h.parentElement;
+    s.dataset.open = s.dataset.open === '1' ? '0' : '1';
+  });
+
+  const colour = (id, key, match) => {
+    $(id).addEventListener('input', () => {
+      state.shirt[key] = $(id).value;
+      if (match) state.shirt[match] = false;
+      if (key === 'body'){
+        $('#cBodyHex').value = $(id).value;
+        $$('#swatches .sw').forEach(b => b.classList.toggle('on', b.dataset.hex.toLowerCase() === $(id).value.toLowerCase()));
+      }
+      applyShirt(); renderEditor();
+    });
+    $(id).addEventListener('change', () => { syncShirtInputs(); push(); });
+  };
+  colour('#cBody', 'body');
+  colour('#cSleeve', 'sleeve', 'matchSleeve');
+  colour('#cTrim', 'trim', 'matchTrim');
+  colour('#cPlacket', 'placket', 'matchPlacket');
+  colour('#cButton', 'button');
+  $('#cBodyHex').addEventListener('change', () => {
+    let v = $('#cBodyHex').value.trim();
+    if (!/^#/.test(v)) v = '#' + v;
+    if (/^#[0-9a-f]{6}$/i.test(v)){ state.shirt.body = v; syncShirtInputs(); applyShirt(); renderEditor(); push(); }
+    else syncShirtInputs();
+  });
+  [['#mSleeve','matchSleeve'],['#mTrim','matchTrim'],['#mPlacket','matchPlacket']].forEach(p => {
+    $(p[0]).addEventListener('change', () => {
+      state.shirt[p[1]] = $(p[0]).checked;
+      syncShirtInputs(); applyShirt(); renderEditor(); push();
+    });
+  });
+  $('#fabric').addEventListener('change', () => { state.shirt.fabric = $('#fabric').value; applyShirt(); push(); });
+  $('#fabDepth').addEventListener('input', () => {
+    state.shirt.fabDepth = +$('#fabDepth').value;
+    $('#fabDepthV').textContent = state.shirt.fabDepth;
+    applyShirt();
+  });
+  $('#fabDepth').addEventListener('change', push);
+
+  $('#backdrop').addEventListener('change', () => { state.view.backdrop = $('#backdrop').value; applyBackdrop(); saveLocal(); });
+  $('#showArea').addEventListener('change', () => { state.view.showArea = $('#showArea').checked; updateOutlines(); saveLocal(); });
+  $('#followArea').addEventListener('change', () => { state.view.followArea = $('#followArea').checked; saveLocal(); });
+  $('#showShadow').addEventListener('change', () => { state.view.showShadow = $('#showShadow').checked; applyBackdrop(); saveLocal(); });
+
+  $('#addText').onclick = addText;
+  $('#addImage').onclick = () => { pendingReplace = null; $('#fileImg').click(); };
+  $('#addArtBtn').onclick = () => {
+    const p = $('#artPanel');
+    const open = p.style.display !== 'none';
+    artReplaceId = null;
+    p.style.display = open ? 'none' : 'block';
+  };
+  $('#fileImg').addEventListener('change', e => {
+    const files = e.target.files;
+    if (files && files.length){
+      if (pendingReplace){
+        const l = findLayer(pendingReplace);
+        const fr = new FileReader();
+        fr.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            const id = uid();
+            assets[id] = { src:fr.result, img, w:img.naturalWidth, h:img.naturalHeight, cache:{} };
+            const P = PANELS[l ? panelOf(l) : state.focus] || PANELS.front;
+            if (l){ l.asset = id; l.scale = Math.min(P.w*0.6/img.naturalWidth, P.h*0.45/img.naturalHeight); }
+            afterEdit(true); renderProps();
+          };
+          img.src = fr.result;
+        };
+        fr.readAsDataURL(files[0]);
+        pendingReplace = null;
+      } else addImages(files);
+    }
+    e.target.value = '';
+  });
+
+  $$('.viewbar button[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
+  $('#btnSpin').onclick = () => {
+    state.view.spin = !state.view.spin;
+    $('#btnSpin').classList.toggle('on', state.view.spin);
+    needsRender = true;
+  };
+  $('#btnUndo').onclick = () => restore(hIndex - 1);
+  $('#btnRedo').onclick = () => restore(hIndex + 1);
+  $('#btnShot').onclick = shot;
+  $('#btnMenu').onclick = () => fileMenu($('#btnMenu'));
+
+  $$('#mtabs button').forEach(b => b.onclick = () => {
+    $$('#mtabs button').forEach(o => o.classList.toggle('on', o === b));
+    $('#railL').dataset.tab = b.dataset.tab === 'shirt' ? 'shirt' : 'design';
+    $('#railR').dataset.tab = b.dataset.tab === 'shirt' ? 'shirt' : 'design';
+    if (b.dataset.tab === 'design'){ sizeEditor(); renderEditor(); }
+  });
+
+  let rt;
+  window.addEventListener('resize', () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => { sizeEditor(); renderEditor(); }, 90);
+  });
+
+  document.addEventListener('keydown', e => {
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+    const meta = e.metaKey || e.ctrlKey;
+    if (meta && e.key.toLowerCase() === 'z'){
+      e.preventDefault();
+      restore(e.shiftKey ? hIndex + 1 : hIndex - 1);
+      return;
+    }
+    if (meta && e.key.toLowerCase() === 'd'){
+      e.preventDefault();
+      if (state.sel) duplicateLayer(state.sel);
+      return;
+    }
+    const l = selLayer();
+    if (!l) return;
+    if (e.key === 'Escape'){ state.sel = null; renderLayers(); renderProps(); renderEditor(); return; }
+    if (e.key === 'Delete' || e.key === 'Backspace'){ e.preventDefault(); removeLayer(l.id); return; }
+    const step = e.shiftKey ? 30 : 3;
+    let moved = false;
+    if (e.key === 'ArrowLeft'){ l.x -= step; moved = true; }
+    if (e.key === 'ArrowRight'){ l.x += step; moved = true; }
+    if (e.key === 'ArrowUp'){ l.y -= step; moved = true; }
+    if (e.key === 'ArrowDown'){ l.y += step; moved = true; }
+    if (moved){
+      e.preventDefault(); clampToCloth(l); afterEdit(false);
+      clearTimeout(window._nudge); window._nudge = setTimeout(() => { renderLayers(); push(); }, 380);
+    }
+  });
+}
+
+/* ----- seed ------------------------------------------------------------ */
+function seedDesign(){
+  const P = PANELS.front;
+  const cx = P.x + P.w/2, cy = P.y + P.h*0.52, u = P.w/100;
+  const mk = (type, o) => {
+    const l = newLayer(type);
+    Object.assign(l, o);
+    l.panel = 'front';
+    state.layers.push(l);
+    return l;
+  };
+  mk('art',  { art:'laurel', size:Math.round(u*46), x:cx, y:cy, color:'#F2F1EC', color2:'#E8B457' });
+  mk('text', { text:'PIQUE', font:'Anton', size:Math.round(u*15), x:cx, y:cy - u*1, color:'#F2F1EC', ls:Math.round(u*0.4) });
+  mk('text', { text:'ATHLETIC CLUB', font:'Bebas Neue', size:Math.round(u*5.2), x:cx, y:cy + u*10,
+               color:'#E8B457', ls:Math.round(u*1.1) });
+  mk('text', { text:'EST. 1984', font:'Bebas Neue', size:Math.round(u*3.8), x:cx, y:cy - u*16,
+               color:'#F2F1EC', ls:Math.round(u*0.9), curve:30 });
+  const sl = PANELS.sleeveR;
+  mk('art',  { art:'star', size:Math.round(Math.min(sl.w, sl.h)*0.26), panel:'sleeveR',
+               x:sl.x + sl.w*0.5, y:sl.y + sl.h*0.62, color:'#E8B457' });
+  state.layers.forEach(homeLayer);
+}
+
+/* -------------------------------------------------------------- 9. boot */
+async function boot(){
+  if (typeof THREE === 'undefined'){
+    $('#spinner').innerHTML = 'The 3D library could not be loaded — check the connection and reload.';
+    return;
+  }
+  ed.c = $('#editor');
+  ed.x = ed.c.getContext('2d');
+
+  layoutAtlas();                       /* measure the garment, lay out the pattern */
+  buildTabs(); buildSwatches(); buildArtPicker(); bindEditor(); wire();
+
+  try { initThree(); }
+  catch(err){
+    console.error(err);
+    $('#spinner').innerHTML = 'Something went wrong building the model.';
+    return;
+  }
+
+  let restored = false;
+  try {
+    const raw = localStorage.getItem('pique.v2') || localStorage.getItem('pique.v1');
+    if (raw) restored = await deserialize(JSON.parse(raw));
+  } catch(e){ restored = false; }
+  if (!restored || !state.layers.length) seedDesign();
+
+  syncShirtInputs(); applyShirt(); applyBackdrop();
+  sizeEditor(); renderAll(); focusPanel(state.focus);
+  renderLayers(); renderProps(); syncTabs();
+  history = []; hIndex = -1; push();
+
+  $('#spinner').classList.add('gone');
+  setTimeout(() => { const s = $('#spinner'); if (s) s.style.display = 'none'; }, 500);
+
+  preloadFonts();
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+</script>
+</body>
+</html>
