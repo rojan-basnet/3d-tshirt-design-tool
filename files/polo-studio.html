@@ -26,7 +26,7 @@
   --sweep-b:#C6C4BC;
   --r:9px;
   --rail-l:296px;
-  --rail-r:352px;
+  --rail-r:452px;
   --bar:56px;
   color-scheme:dark;
 }
@@ -211,7 +211,8 @@ input[type=file]{display:none}
 .editwrap{padding:14px 14px 10px}
 .editframe{
   position:relative;border-radius:10px;overflow:hidden;background:#0B1022;
-  border:1px solid var(--line);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)
+  border:1px solid var(--line);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25);
+  height:min(66vh,700px)
 }
 #editor{display:block;width:100%;touch-action:none;cursor:default}
 .edithead{display:flex;align-items:center;gap:8px;margin-bottom:9px}
@@ -234,7 +235,8 @@ input[type=file]{display:none}
 .mtabs{display:none}
 
 @media (max-width:1080px){
-  :root{--rail-l:260px;--rail-r:310px}
+  :root{--rail-l:260px;--rail-r:396px}
+  .editframe{height:min(58vh,560px)}
   .mark span{display:none}
 }
 @media (max-width:900px){
@@ -246,6 +248,7 @@ input[type=file]{display:none}
   .stage{height:46vh;min-height:300px;position:relative}
   .rail{width:100%;flex:none;border:0;border-top:1px solid var(--line-soft);overflow:visible}
   .rail-l[data-tab="design"],.rail-r[data-tab="shirt"]{display:none}
+  .editframe{height:56vh}
   .mtabs{
     display:flex;position:sticky;top:0;z-index:6;background:var(--panel);gap:3px;padding:7px 11px;
     border-bottom:1px solid var(--line-soft)
@@ -947,19 +950,53 @@ const topYAt = t => G.TOP + G.CREST * Math.pow(Math.abs(Math.sin(t)), 2);
 const profA = v => cat(G.A_KEYS, v);
 const profB = v => cat(G.B_KEYS, v);
 
+/* ----- fine surface detail: small sculpted creases, not a cloth sim, but
+   enough to break up the "mannequin" flatness at the spots real cloth
+   actually folds (underarm, and a soft lower-torso settle). ------------- */
+const smooth01 = x => { x = clamp(x, 0, 1); return x*x*(3 - 2*x); };
+function angDist(t, target){
+  const d = Math.abs(((t - target) % (Math.PI*2)) + Math.PI*3) % (Math.PI*2) - Math.PI;
+  return Math.abs(d);
+}
+const nearestSideDist = t => Math.min(angDist(t, 0), angDist(t, Math.PI));  /* 0 at a side seam .. PI/2 at centre front/back */
+
+function torsoWrinkle(t, y){
+  const ds = nearestSideDist(t);
+  const armY = G.SL_S[1];
+  const armBand = Math.exp(-Math.pow((y - armY) / 0.27, 2)) * smooth01(1 - ds / 1.0);
+  let w = armBand * Math.sin(ds*8 - y*12) * 0.013;
+
+  const centre = smooth01(ds / (Math.PI/2));
+  const lowBand = smooth01(1 - Math.abs(y - 0.92) / 0.6) * centre;
+  w += Math.sin(y*12 + ds*2.1) * 0.006 * lowBand;
+  return w;
+}
+function sleeveWrinkle(u, t){
+  const bend = Math.exp(-Math.pow((u - 0.52) / 0.15, 2));
+  const gather = smooth01((u - 0.85) / 0.11);
+  return Math.sin(t*5) * 0.010 * bend + Math.sin(t*7 + 1) * 0.005 * gather;
+}
+
 function torsoAt(t, v){
-  const a = profA(v), b = profB(v);
-  return V3(a * se(Math.cos(t), G.N_EXP), v * topYAt(t), b * se(Math.sin(t), G.N_EXP));
+  return torsoAtY(t, v * topYAt(t));
 }
 function torsoAtY(t, y){
   const v = clamp(y / topYAt(t), 0, 1), a = profA(v), b = profB(v);
-  return V3(a * se(Math.cos(t), G.N_EXP), y, b * se(Math.sin(t), G.N_EXP));
+  const base = V3(a * se(Math.cos(t), G.N_EXP), y, b * se(Math.sin(t), G.N_EXP));
+  const w = torsoWrinkle(t, y);
+  if (!w) return base;
+  const n = torsoNormal(t, y);
+  return V3(base.x + n.x*w, base.y, base.z + n.z*w);
 }
 function torsoNormal(t, y){
+  /* analytic gradient of the base (un-wrinkled) superellipse — used both as the
+     mesh normal and as the direction wrinkle displacement rides along, which is
+     the standard, safe approximation for a small perturbation. No dependency on
+     torsoAtY here, so this can't recurse into the wrinkled position. */
   const v = clamp(y / topYAt(t), 0, 1), a = profA(v), b = profB(v), n = G.N_EXP;
-  const p = torsoAtY(t, y);
-  const gx = (p.x < 0 ? -1 : 1) * Math.pow(Math.abs(p.x / a), n - 1) / a;
-  const gz = (p.z < 0 ? -1 : 1) * Math.pow(Math.abs(p.z / b), n - 1) / b;
+  const cx = se(Math.cos(t), n), cz = se(Math.sin(t), n);
+  const gx = (cx < 0 ? -1 : 1) * Math.pow(Math.abs(cx), n - 1) / a;
+  const gz = (cz < 0 ? -1 : 1) * Math.pow(Math.abs(cz), n - 1) / b;
   const v3 = V3(gx, 0, gz);
   if (v3.lengthSq() < 1e-9) v3.set(0, 0, 1);
   return v3.normalize();
@@ -983,11 +1020,15 @@ function sleeveAt(side, u, t){
   const F = sleeveFrame(side), k = sleeveScale(u);
   const rA = G.SL_RA * k, rB = G.SL_RB * k;
   const c = Math.cos(t), s = Math.sin(t);
-  return V3(
+  const base = V3(
     F.S.x + F.d.x * G.SL_LEN * u + F.e1.x * rA * c + F.e2.x * rB * s,
     F.S.y + F.d.y * G.SL_LEN * u + F.e1.y * rA * c + F.e2.y * rB * s,
     F.S.z + F.d.z * G.SL_LEN * u + F.e1.z * rA * c + F.e2.z * rB * s
   );
+  const w = sleeveWrinkle(u, t);
+  if (!w) return base;
+  const n = sleeveNormal(side, u, t);
+  return V3(base.x + n.x*w, base.y + n.y*w, base.z + n.z*w);
 }
 function sleeveNormal(side, u, t){
   const F = sleeveFrame(side), k = sleeveScale(u);
@@ -1251,9 +1292,9 @@ function buildModel(){
   }
   const ringN = ringNormals(ring, true);
   PART.torsoF = add(surf(cols(ring, 0, H), subRect(F, F.yokeFrac, 1),
-                         { normals: cols(ringN, 0, H) }), MAT.garment, true);
+                         { normals: cols(ringN, 0, H), uFlip:true }), MAT.garment, true);
   PART.torsoB = add(surf(cols(ring, H, N-1), subRect(B, B.yokeFrac, 1),
-                         { normals: cols(ringN, H, N-1) }), MAT.garment, true);
+                         { normals: cols(ringN, H, N-1), uFlip:true }), MAT.garment, true);
 
   /* hem cap so you cannot see up inside the shirt */
   const hemRow = ring[M-1];
@@ -1269,9 +1310,9 @@ function buildModel(){
   }
   const yokeN = ringNormals(yoke, true, p => V3(p.x*0.5, 1, p.z*0.5));
   PART.yokeF = add(surf(cols(yoke, 0, H), subRect(F, 0, F.yokeFrac),
-                        { normals: cols(yokeN, 0, H) }), MAT.garment, true);
+                        { normals: cols(yokeN, 0, H), uFlip:true }), MAT.garment, true);
   PART.yokeB = add(surf(cols(yoke, H, N-1), subRect(B, 0, B.yokeFrac),
-                        { normals: cols(yokeN, H, N-1) }), MAT.garment, true);
+                        { normals: cols(yokeN, H, N-1), uFlip:true }), MAT.garment, true);
 
   /* --- neck facing + blocker --- */
   const fRows = [];
@@ -1304,7 +1345,7 @@ function buildModel(){
       sleeveAt(side, SL_U0, 0).lerp(sleeveAt(side, SL_U0, Math.PI), 0.5));
     const nrm = ringNormals(rows, true,
       (p, i, j) => sleeveNormal(side, sleeveU(Math.max(i, 1)/(SM-1)), ang(j)));
-    PART.sleeves.push(add(surf(rows, SP, { normals: nrm }), MAT.garment, true));
+    PART.sleeves.push(add(surf(rows, SP, { normals: nrm, uFlip:true }), MAT.garment, true));
 
     /* ribbed cuff */
     const cu = i => lerp(0.86, 1.0, i/4);
@@ -1319,7 +1360,7 @@ function buildModel(){
       cRows.push(row);
     }
     const cn = ringNormals(cRows, true, (p, i, j) => sleeveNormal(side, cu(i), ang(j)));
-    PART.cuffs.push(add(surf(cRows, CP, { normals: cn }), MAT.trim, true));
+    PART.cuffs.push(add(surf(cRows, CP, { normals: cn, uFlip:true }), MAT.trim, true));
 
     /* inside of the cuff, rolled under */
     const iRows = [cRows[4]];
@@ -1348,7 +1389,7 @@ function buildModel(){
     }
     colRows.push(row);
   }
-  PART.collar = add(surf(colRows, PANELS.collar, { vFlip:true }), MAT.trim, true);
+  PART.collar = add(surf(colRows, PANELS.collar, { vFlip:true, uFlip:true }), MAT.trim, true);
 
   /* --- placket --- */
   const PM = 30, PN = 13, pRows = [];
@@ -1408,11 +1449,11 @@ function initThree(){
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(31, 1, 0.1, 100);
 
-  scene.add(new THREE.HemisphereLight(0xdde6ff, 0x3a3f52, 0.62));
-  const key = new THREE.DirectionalLight(0xfff6e8, 0.92); key.position.set(3.2, 5.0, 4.4);
-  const fill = new THREE.DirectionalLight(0xdfe9ff, 0.34); fill.position.set(-4.6, 1.8, 3.2);
-  const rim = new THREE.DirectionalLight(0xffffff, 0.46); rim.position.set(-1.8, 3.4, -5.2);
-  const rim2 = new THREE.DirectionalLight(0xffffff, 0.22); rim2.position.set(2.6, 1.2, -4.4);
+  scene.add(new THREE.HemisphereLight(0xdde6ff, 0x3a3f52, 0.68));
+  const key = new THREE.DirectionalLight(0xfff6e8, 0.85); key.position.set(3.2, 5.0, 4.4);
+  const fill = new THREE.DirectionalLight(0xdfe9ff, 0.40); fill.position.set(-4.6, 1.8, 3.2);
+  const rim = new THREE.DirectionalLight(0xffffff, 0.50); rim.position.set(-1.8, 3.4, -5.2);
+  const rim2 = new THREE.DirectionalLight(0xffffff, 0.24); rim2.position.set(2.6, 1.2, -4.4);
   scene.add(key, fill, rim, rim2);
 
   /* soft contact shadow */
@@ -1531,14 +1572,18 @@ function applyShirt(){
   weaveTex.repeat.set(rep, rep);
   MAT.garment.map = atlasTex;
   MAT.garment.bumpMap = none ? null : weaveTex;
-  MAT.garment.bumpScale = 0.016 * depth;
+  MAT.garment.bumpScale = 0.019 * depth;
+  MAT.garment.roughnessMap = none ? null : weaveTex;
+  MAT.garment.roughness = 0.82;
   MAT.garment.color.setRGB(1, 1, 1);
   MAT.garment.needsUpdate = true;
 
   ribTex.repeat.set(rep * 0.45, 1);
   MAT.trim.map = atlasTex;
   MAT.trim.bumpMap = ribTex;
-  MAT.trim.bumpScale = 0.013 * Math.max(depth, 0.4);
+  MAT.trim.bumpScale = 0.015 * Math.max(depth, 0.4);
+  MAT.trim.roughnessMap = ribTex;
+  MAT.trim.roughness = 0.88;
   MAT.trim.color.setRGB(1, 1, 1);
   MAT.trim.needsUpdate = true;
 
